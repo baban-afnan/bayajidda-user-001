@@ -216,7 +216,7 @@
                             </li>
                             <li style="margin-bottom: 20px; display: flex;">
                                 <div style="width: 30px; color: #002fba; margin-top: 2px;"><i class="fas fa-envelope"></i></div>
-                                <span style="color: rgba(255,255,255,0.8);">info@Digital Verify Sub.com.ng</span>
+                                <span style="color: rgba(255,255,255,0.8);">safanane@gmail.com</span>
                             </li>
                         </ul>
                     </div>
