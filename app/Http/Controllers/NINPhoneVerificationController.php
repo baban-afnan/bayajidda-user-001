@@ -130,10 +130,12 @@ class NINPhoneVerificationController extends Controller
 
             $response = Http::withToken($apiKey)
                 ->acceptJson()
+                ->timeout(30)
                 ->post($url, $payload);
 
             $data = $response->json();
 
+            // Check for successful response
             if ($response->successful() && isset($data['status']) && $data['status'] === true) {
                 if (isset($data['api_response']['status']) && $data['api_response']['status'] === true) {
                      return $this->processSuccessTransaction(
@@ -147,15 +149,74 @@ class NINPhoneVerificationController extends Controller
                 }
             }
 
-            return back()->with([
-                'status' => 'error',
-                'message' => $data['message'] ?? 'Verification failed. Please check the phone number and try again.'
+            // Handle different error scenarios
+            $errorMessage = $data['message'] ?? 'Verification failed. Please try again.';
+            
+            // Check if it's an upstream provider error
+            if (isset($data['message']) && (
+                str_contains(strtolower($data['message']), 'upstream') ||
+                str_contains(strtolower($data['message']), 'nimc') ||
+                str_contains(strtolower($data['message']), 'unavailable') ||
+                str_contains(strtolower($data['message']), 'service is currently')
+            )) {
+                \Log::warning('NIMC Service Unavailable', [
+                    'phone' => $request->phone_number,
+                    'user_id' => $user->id,
+                    'response' => $data
+                ]);
+                
+                return back()->with([
+                    'status' => 'warning',
+                    'message' => $errorMessage . ' This is a temporary issue with the verification service provider.'
+                ]);
+            }
+
+            // Log API errors for debugging
+            \Log::error('NIN Phone Verification API Error', [
+                'phone' => $request->phone_number,
+                'user_id' => $user->id,
+                'status_code' => $response->status(),
+                'response' => $data
             ]);
 
-        } catch (\Exception $e) {
             return back()->with([
                 'status' => 'error',
-                'message' => 'System Error: ' . $e->getMessage()
+                'message' => $errorMessage
+            ]);
+
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            \Log::error('NIN Phone Verification Connection Error', [
+                'phone' => $request->phone_number ?? 'N/A',
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return back()->with([
+                'status' => 'error',
+                'message' => 'Unable to connect to verification service. Please check your internet connection and try again.'
+            ]);
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            \Log::error('NIN Phone Verification Request Error', [
+                'phone' => $request->phone_number ?? 'N/A',
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return back()->with([
+                'status' => 'error',
+                'message' => 'Verification request failed. Please try again later.'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('NIN Phone Verification System Error', [
+                'phone' => $request->phone_number ?? 'N/A',
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return back()->with([
+                'status' => 'error',
+                'message' => 'A system error occurred. Please contact support if this persists.'
             ]);
         }
     }
@@ -168,7 +229,22 @@ class NINPhoneVerificationController extends Controller
         DB::beginTransaction();
 
         try {
-            $ninData = $apiResponse['api_response']['data']['data'] ?? [];
+            // Extract data from API response - handle both array and single object
+            $dataArray = $apiResponse['api_response']['data']['data'] ?? [];
+            
+            // Get the first record if it's an array, otherwise use empty array
+            $ninData = [];
+            if (is_array($dataArray) && !empty($dataArray)) {
+                $ninData = isset($dataArray[0]) ? $dataArray[0] : $dataArray;
+            }
+            
+            // Log if no data received but continue with transaction
+            if (empty($ninData)) {
+                \Log::warning('NIN Phone Verification - No data in response', [
+                    'user_id' => $user->id,
+                    'response' => $apiResponse
+                ]);
+            }
             
             $transactionRef = 'Phone-' . (time() % 1000000000) . '-' . mt_rand(100, 999);
             $performedBy = $user->first_name . ' ' . $user->last_name;
@@ -179,7 +255,7 @@ class NINPhoneVerificationController extends Controller
                 'amount' => $servicePrice,
                 'description' => "NIN Phone Verification - {$serviceField->field_name}",
                 'type' => 'debit',
-                'status' => 'completed',
+                'status' => 'pending',
                 'performed_by'    => $performedBy,
                 'metadata' => [
                     'service' => 'verification',
@@ -200,28 +276,72 @@ class NINPhoneVerificationController extends Controller
             // Deduct wallet balance
             $wallet->decrement('balance', $servicePrice);
 
+            // Map all fields from API response to verification table
             Verification::create([
                 'user_id' => $user->id,
                 'service_field_id' => $serviceField->id,
                 'service_id' => $service->id,
                 'transaction_id' => $transaction->id,
                 'reference' => $transactionRef,
-                'number_nin' => $ninData['nin'] ?? null,
+                'field_code' => $serviceField->field_code ?? null,
+                'field_name' => $serviceField->field_name ?? null,
+                'service_name' => $service->service_name ?? null,
+                'service_type' => $service->service_type ?? null,
+                'amount' => $servicePrice,
+                
+                // Personal Information
                 'firstname' => $ninData['firstname'] ?? null,
                 'middlename' => $ninData['middlename'] ?? null,
                 'surname' => $ninData['surname'] ?? null,
-                'birthdate' =>  $ninData['birthdate'] ?? null,
                 'gender' => $ninData['gender'] ?? null,
+                'birthdate' => $ninData['birthdate'] ?? null,
+                'birthstate' => $ninData['birthstate'] ?? null,
+                'birthlga' => $ninData['birthlga'] ?? null,
+                'birthcountry' => $ninData['birthcountry'] ?? null,
+                'maritalstatus' => $ninData['maritalstatus'] ?? null,
+                'email' => $ninData['email'] ?? null,
                 'telephoneno' => $ninData['telephoneno'] ?? null,
-                'photo_path' => $ninData['photo'] ?? null,
-                'signature_path' => $ninData['signature'] ?? null,
+                
+                // Residence Information
+                'residence_address' => $ninData['residence_AdressLine1'] ?? null,
                 'residence_state' => $ninData['residence_state'] ?? null,
                 'residence_lga' => $ninData['residence_lga'] ?? null,
-                'residence_town' => $ninData['residence_town'] ?? null,
-                'residence_address' => $ninData['residence_AdressLine1'] ?? null,
-                'self_origin_state' => $ninData['self_origin_state'] ?? null,
+                'residence_town' => $ninData['residence_Town'] ?? null,
+                
+                // Additional Information
+                'religion' => $ninData['religion'] ?? null,
+                'employmentstatus' => $ninData['emplymentstatus'] ?? null,
+                'educationallevel' => $ninData['educationallevel'] ?? null,
+                'profession' => $ninData['profession'] ?? null,
+                'height' => $ninData['heigth'] ?? null,
+                'title' => $ninData['title'] ?? null,
+                
+                // NIN and Identification
+                'nin' => $ninData['nin'] ?? null,
+                'number_nin' => $ninData['nin'] ?? null,
+                'userid' => $ninData['centralID'] ?? null,
+                'photo_path' => $ninData['photo'] ?? null,
+                'signature_path' => $ninData['signature'] ?? null,
                 'trackingId' => $ninData['trackingId'] ?? null,
-                'performed_by'    => $performedBy,
+                
+                // Next of Kin Information
+                'nok_firstname' => $ninData['nok_firstname'] ?? null,
+                'nok_middlename' => $ninData['nok_middlename'] ?? null,
+                'nok_surname' => $ninData['nok_surname'] ?? null,
+                'nok_address1' => $ninData['nok_address1'] ?? null,
+                'nok_address2' => $ninData['nok_address2'] ?? null,
+                'nok_lga' => $ninData['nok_lga'] ?? null,
+                'nok_state' => $ninData['nok_state'] ?? null,
+                'nok_town' => $ninData['nok_town'] ?? null,
+                'nok_postalcode' => $ninData['nok_postalcode'] ?? null,
+                
+                // Self Origin Information
+                'self_origin_state' => $ninData['self_origin_state'] ?? null,
+                'self_origin_lga' => $ninData['self_origin_lga'] ?? null,
+                'self_origin_place' => $ninData['self_origin_place'] ?? null,
+                
+                // Transaction Information
+                'performed_by' => $performedBy,
                 'submission_date' => Carbon::now(),
                 'status' => 'pending',
                 'response_data' => $apiResponse
@@ -330,17 +450,6 @@ class NINPhoneVerificationController extends Controller
     {
         try {
             $this->chargeForSlip(Auth::user(), 'V102');
-            $repObj = new NIN_PDF_Repository();
-            return $repObj->regularPDF($nin_no);
-        } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
-        }
-    }
-
-    public function freeSlip($nin_no)
-    {
-        try {
-            // NIN phone doesn't typically have a free slip, but adding for alignment if needed
             $repObj = new NIN_PDF_Repository();
             return $repObj->regularPDF($nin_no);
         } catch (\Exception $e) {
