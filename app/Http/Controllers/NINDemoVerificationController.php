@@ -420,7 +420,7 @@ class NINDemoVerificationController extends Controller
         
         DB::beginTransaction();
         try {
-             $transactionRef = 'Slip-' . (time() % 1000000000) . '-' . mt_rand(100, 999);
+             $transactionRef = 'D-' . (time() % 1000000000) . '-' . mt_rand(100, 999);
              $performedBy = $user->first_name . ' ' . $user->last_name;
  
              Transaction::create([
@@ -429,7 +429,7 @@ class NINDemoVerificationController extends Controller
                  'amount' => $servicePrice,
                  'description' => "Slip Download: {$serviceField->field_name}",
                  'type' => 'debit',
-                 'status' => 'pending',
+                 'status' => 'completed',
                  'performed_by'    => $performedBy,
                  'metadata' => [
                      'service' => 'slip_download',
