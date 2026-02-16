@@ -167,7 +167,7 @@
             
             $.ajax({
                 type: "get",
-                url: "{{ url('fetch-data-type') }}",
+                url: "{{ route('sme.fetch.type') }}",
                 data: { id: service_id },
                 dataType: "json",
                 success: function (response) {
@@ -183,7 +183,7 @@
                     $("#amountToPay").val("");
                 },
                 error: function (data) {
-                    console.error("Error fetching data types");
+                    console.error("Error fetching data types", data);
                 },
             });
         });
@@ -195,7 +195,7 @@
 
             $.ajax({
                 type: "get",
-                url: "{{ url('fetch-data-plan') }}",
+                url: "{{ route('sme.fetch.plan') }}",
                 data: { id: service_id, type: type },
                 dataType: "json",
                 success: function (response) {
@@ -211,7 +211,7 @@
                     $("#amountToPay").val("");
                 },
                 error: function (data) {
-                    console.error("Error fetching data plans");
+                    console.error("Error fetching data plans", data);
                 },
             });
         });
@@ -225,14 +225,14 @@
 
             $.ajax({
                 type: "get",
-                url: "{{ url('fetch-sme-data-bundles-price') }}",
+                url: "{{ route('sme.fetch.price') }}",
                 data: { id: plan_id },
                 dataType: "json",
                 success: function (response) {
                     $("#amountToPay").val("₦ " + response);
                 },
                 error: function (data) {
-                    console.error("Error fetching price");
+                    console.error("Error fetching price", data);
                 },
             });
         });
