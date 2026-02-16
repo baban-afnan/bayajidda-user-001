@@ -130,6 +130,7 @@ class TinRegistrationController extends Controller
             $request->validate([
                 'nin' => 'required|digits:11',
                 'first_name' => 'required|string',
+                'middle_name' => 'nullable|string',
                 'last_name' => 'required|string',
                 'date_of_birth' => 'required|date',
             ]);
@@ -185,6 +186,7 @@ class TinRegistrationController extends Controller
                 'submission_date' => now(),
                 'firstname' => $request->first_name,
                 'surname' => $request->last_name,
+                'middlename' => $request->middle_name, // Fixed to include middlename
                 'birthdate' => $request->date_of_birth,
                 'nin' => $request->nin,
                 'type' => $request->type,
@@ -202,6 +204,7 @@ class TinRegistrationController extends Controller
                 $payload = [
                     'nin' => trim($request->nin),
                     'firstName' => trim($request->first_name),
+                    'middleName' => trim($request->middle_name ?? ''),
                     'lastName' => trim($request->last_name),
                     'dateOfBirth' => date('Y-m-d', strtotime($request->date_of_birth)),
                 ];

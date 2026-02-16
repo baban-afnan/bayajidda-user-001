@@ -182,51 +182,45 @@
                                             @if(session('verification')['type'] == 'individual')
                                                 <tr>
                                                     <th class="w-40 bg-light">NIN Number</th>
-                                                    <td class="fw-bold text-primary">{{ session('verification')['data']['nin'] ?? session('verification')['data']['tin'] ?? 'N/A' }}</td>
-                                                </tr>
-
-                                                  <tr>
-                                                    <th class="w-40 bg-light">Tax ID</th>
-                                                    <td class="fw-bold text-primary">{{ session('verification')['data']['tax_id'] ?? session('verification')['data']['tin'] ?? 'N/A' }}</td>
+                                                    <td class="fw-bold text-primary">{{ session('verification')['data']['nin'] ?? 'N/A' }}</td>
                                                 </tr>
 
                                                 <tr>
-                                                    <th class="bg-light">First Name</th>
-                                                    <td>{{ session('verification')['data']['firstName'] ?? 'N/A' }}</td>
+                                                    <th class="w-40 bg-light">Tax ID (TIN)</th>
+                                                    <td class="fw-bold text-success">{{ session('verification')['data']['tax_id'] ?? session('verification')['data']['tin'] ?? session('verification')['data']['taxIdentificationNumber'] ?? 'N/A' }}</td>
                                                 </tr>
+
                                                 <tr>
-                                                    <th class="bg-light">Last Name</th>
-                                                    <td>{{ session('verification')['data']['surname'] ?? session('verification')['data']['lastName'] ?? 'N/A' }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th class="bg-light">Middle Name</th>
-                                                    <td>{{ session('verification')['data']['middleName'] ?? 'N/A' }}</td>
+                                                    <th class="bg-light">Full Name</th>
+                                                    <td>
+                                                        {{ session('verification')['data']['firstName'] ?? '' }} 
+                                                        {{ session('verification')['data']['middleName'] ?? '' }} 
+                                                        {{ session('verification')['data']['surname'] ?? session('verification')['data']['lastName'] ?? '' }}
+                                                    </td>
                                                 </tr>
                                                 <tr>
                                                     <th class="bg-light">Date of Birth</th>
                                                     <td>
-                                                        {{ !empty(session('verification')['data']['birthDate'])
-                                                            ? session('verification')['data']['birthDate']
-                                                            : (!empty(session('verification')['data']['dateOfBirth']) ? session('verification')['data']['dateOfBirth'] : 'N/A') }}
+                                                        {{ session('verification')['data']['birthDate'] ?? session('verification')['data']['dateOfBirth'] ?? 'N/A' }}
                                                     </td>
                                                 </tr>
                                             @else
                                                 <tr>
                                                     <th class="w-40 bg-light">Organization</th>
-                                                    <td class="fw-bold text-primary">{{ session('verification')['data']['company_name'] ?? 'N/A' }}</td>
+                                                    <td class="fw-bold text-primary">{{ session('verification')['data']['company_name'] ?? session('verification')['data']['business_name'] ?? 'N/A' }}</td>
                                                 </tr>
                                                 <tr>
                                                     <th class="bg-light">RC Number</th>
-                                                    <td>{{ session('verification')['data']['rc'] ?? 'N/A' }}</td>
+                                                    <td>{{ session('verification')['data']['rc'] ?? session('verification')['data']['rc_number'] ?? 'N/A' }}</td>
                                                 </tr>
                                                 <tr>
-                                                    <th class="bg-light">Tax ID</th>
-                                                    <td>{{ session('verification')['data']['tax_id'] ?? session('verification')['data']['tin'] ?? 'N/A'  }}</td>
+                                                    <th class="bg-light">Tax ID (TIN)</th>
+                                                    <td class="fw-bold text-success">{{ session('verification')['data']['tax_id'] ?? session('verification')['data']['tin'] ?? session('verification')['data']['taxIdentificationNumber'] ?? 'N/A' }}</td>
                                                 </tr>
                                             @endif
                                             <tr>
                                                 <th class="bg-light">Phone</th>
-                                                <td>{{ session('verification')['data']['telephoneNo'] ?? 'N/A' }}</td>
+                                                <td>{{ session('verification')['data']['telephoneNo'] ?? session('verification')['data']['phoneNumber'] ?? 'N/A' }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -362,10 +356,16 @@
             function toggleRequired(container, isRequired) {
                 const inputs = container.querySelectorAll('input, select');
                 inputs.forEach(input => {
-                    // Only toggle required if it's the main required fields
-                    if(input.id === 'nin' || input.id === 'dob' || input.id === 'rc_number' || input.id === 'org_type') {
-                        if(isRequired) input.setAttribute('required', 'required');
-                        else input.removeAttribute('required');
+                    const id = input.id;
+                    const requiredIds = ['nin', 'dob', 'rc_number', 'org_type', 'first_name', 'last_name'];
+                    
+                    if (requiredIds.includes(id)) {
+                        if (isRequired) {
+                            input.setAttribute('required', 'required');
+                        } else {
+                            input.removeAttribute('required');
+                            input.value = ''; // Optional: clear hidden field values
+                        }
                     }
                 });
             }
