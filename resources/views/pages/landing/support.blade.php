@@ -1,128 +1,96 @@
 <!-- Support Section -->
-<section id="support" class="support-section" style="padding: 100px 0; background: #fff; position: relative; overflow: hidden;">
-    <!-- Decorative Circle -->
-    <div style="position: absolute; top: -50px; left: -50px; width: 200px; height: 200px; background: rgba(0, 47, 186, 0.1); border-radius: 50%;"></div>
-    
-    <div class="container">
-        <div class="section-title text-center mb-5" data-aos="fade-up">
-            <h4 style="color: #002fba; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;">Get In Touch</h4>
-            <h2 style="color: #111827; font-weight: 800; font-size: 2.5rem;">We're Here to Help</h2>
-            <hr style="width: 60px; height: 3px; background: #002fba; margin: 15px auto; border: none;">
-            <p class="text-muted" style="max-width: 600px; margin: 0 auto; font-size: 1.1rem;">
-                Our expert team is available 24/7 to assist you. Reach out via phone, WhatsApp, or drop us a message below.
-            </p>
-        </div>
-
-        <div class="row align-items-center">
-            <!-- Support Info -->
-            <div class="col-lg-5 mb-5 mb-lg-0" data-aos="fade-right">
-                <div class="support-info-card" style="background: linear-gradient(135deg, #002fba 0%, #001f7a 100%); padding: 40px; border-radius: 20px; color: white; box-shadow: 0 20px 40px rgba(0, 47, 186, 0.3);">
-                    <h3 style="font-weight: 700; margin-bottom: 30px;">Contact Information</h3>
-                    
-                    <div class="d-flex align-items-center mb-4">
-                        <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
-                            <i class="fas fa-phone-alt" style="color: #fff; font-size: 1.2rem;"></i>
-                        </div>
-                        <div>
-                            <span style="display: block; opacity: 0.8; font-size: 0.9rem;">Call Us</span>
-                            <a href="tel:09110501995" style="color: white; font-weight: 600; font-size: 1.1rem; text-decoration: none;">09112345678</a>
-                        </div>
-                    </div>
-
-                    <div class="d-flex align-items-center mb-4">
-                        <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
-                            <i class="fab fa-whatsapp" style="color: #fff; font-size: 1.2rem;"></i>
-                        </div>
-                        <div>
-                            <span style="display: block; opacity: 0.8; font-size: 0.9rem;">WhatsApp Support</span>
-                            <a href="https://wa.me/2349110501995" target="_blank" style="color: white; font-weight: 600; font-size: 1.1rem; text-decoration: none;">Chat Now</a>
-                        </div>
-                    </div>
-
-                    <div class="d-flex align-items-center mb-5">
-                        <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
-                            <i class="fas fa-map-marker-alt" style="color: #fff; font-size: 1.2rem;"></i>
-                        </div>
-                        <div>
-                            <span style="display: block; opacity: 0.8; font-size: 0.9rem;">Visit Us</span>
-                            <span style="color: white; font-weight: 600; font-size: 1rem;">Tudun Wada Street, Gwammaja, Kano</span>
-                        </div>
-                    </div>
-
-                    <div class="social-links pt-4" style="border-top: 1px solid rgba(255,255,255,0.1);">
-                        <a href="#" style="color: white; margin-right: 20px; font-size: 1.2rem;"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" style="color: white; margin-right: 20px; font-size: 1.2rem;"><i class="fab fa-twitter"></i></a>
-                        <a href="#" style="color: white; margin-right: 20px; font-size: 1.2rem;"><i class="fab fa-instagram"></i></a>
-                        <a href="#" style="color: white; font-size: 1.2rem;"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Support Form -->
-            <div class="col-lg-7" data-aos="fade-left">
-                <div class="support-form-wrapper" style="background: #fff; padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); border: 1px solid #eee;">
-                    <h3 style="color: #111827; font-weight: 700; margin-bottom: 20px;">Send Us a Message</h3>
-                    <form id="contact-support-form" action="#" method="POST">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <div class="form-group">
-                                    <label style="font-weight: 600; color: #555; margin-bottom: 8px;">Your Name</label>
-                                    <input type="text" name="name" class="form-control-custom" placeholder="John Doe" required>
+    <section id="support" class="support-section">
+        <div class="container container-custom">
+            <div class="row align-items-center g-5">
+                <!-- Info Column -->
+                <div class="col-lg-6" data-aos="fade-right">
+                    <div class="support-content">
+                        <span class="badge rounded-pill mb-3 support-badge">24/7 ASSISTANCE</span>
+                        <h2 class="support-title">Need Help? <br><span class="text-primary">We're Here For You</span></h2>
+                        <p class="support-description">
+                            Whether you have a question about our services, pricing, or anything else, our team is ready to answer all your inquiries.
+                        </p>
+                        
+                        <div class="contact-methods mt-5">
+                            <div class="contact-method-item d-flex align-items-center mb-4">
+                                <div class="icon-box pulse-red"><i class="fas fa-headset"></i></div>
+                                <div class="ms-4">
+                                    <h5>Live Support</h5>
+                                    <p>Chat with our experts anytime</p>
                                 </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <div class="form-group">
-                                    <label style="font-weight: 600; color: #555; margin-bottom: 8px;">Your Email</label>
-                                    <input type="email" name="email" class="form-control-custom" placeholder="john@example.com" required>
+                            <div class="contact-method-item d-flex align-items-center mb-4">
+                                <div class="icon-box pulse-green"><i class="fab fa-whatsapp"></i></div>
+                                <div class="ms-4">
+                                    <h5>WhatsApp Business</h5>
+                                    <p>Direct message for quick response</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group mb-3">
-                            <label style="font-weight: 600; color: #555; margin-bottom: 8px;">Subject</label>
-                            <input type="text" name="subject" class="form-control-custom" placeholder="How can we help?" required>
-                        </div>
-                        <div class="form-group mb-4">
-                            <label style="font-weight: 600; color: #555; margin-bottom: 8px;">Message</label>
-                            <textarea name="message" rows="5" class="form-control-custom" placeholder="Describe your issue..." required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary-custom">Send Message <i class="fas fa-paper-plane ms-2"></i></button>
-                    </form>
+                    </div>
+                </div>
+
+                <!-- Form Column -->
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="contact-form-card">
+                        <form action="#" method="POST">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="name" placeholder="Name">
+                                        <label for="name">Your Name</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="email" class="form-control" id="email" placeholder="Email">
+                                        <label for="email">Email Address</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <select class="form-select" id="service">
+                                            <option selected>Select Service</option>
+                                            <option value="1">Flight Booking</option>
+                                            <option value="2">Identity Verification</option>
+                                            <option value="3">Utility Bills</option>
+                                        </select>
+                                        <label for="service">Interested In</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" id="message" placeholder="Message" style="height: 150px"></textarea>
+                                        <label for="message">How can we help?</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary-support w-100">
+                                        Send Message <i class="fas fa-paper-plane ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <style>
-        .form-control-custom {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #eee;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-        }
-        .form-control-custom:focus {
-            border-color: #002fba;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0, 47, 186, 0.1);
-        }
-        .btn-primary-custom {
-            background: #002fba;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-        }
-        .btn-primary-custom:hover {
-            background: #001f7a;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 47, 186, 0.3);
-        }
-    </style>
-</section>
+        <style>
+            .support-section { padding: 120px 0; background: #fff; position: relative; }
+            .support-badge { background: #fee2e2; color: #991b1b; padding: 10px 22px; font-weight: 800; letter-spacing: 2px; }
+            .support-title { font-size: 3.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 25px; }
+            .support-description { font-size: 1.25rem; color: #4b5563; line-height: 1.8; margin-bottom: 40px; }
+            .icon-box { width: 65px; height: 65px; background: #fff; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #002fba; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+            .contact-method-item h5 { font-weight: 800; margin-bottom: 5px; font-size: 1.25rem; }
+            .contact-method-item p { color: #6b7280; margin: 0; }
+            .contact-form-card { background: #fff; padding: 50px; border-radius: 35px; box-shadow: 0 30px 60px rgba(0,0,0,0.1); border: 1px solid #f3f4f6; }
+            .form-floating > .form-control { border: none; background: #f9fafb; border-radius: 15px; font-weight: 600; }
+            .form-floating > label { color: #9ca3af; font-weight: 500; }
+            .btn-primary-support { background: #002fba; color: #fff; padding: 20px; border-radius: 18px; font-weight: 800; font-size: 1.1rem; border: none; transition: all 0.3s ease; }
+            .btn-primary-support:hover { background: #001f7a; transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0, 47, 186, 0.3); }
+            .pulse-red { animation: pulse-red 2s infinite; }
+            @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); } }
+        </style>
+    </section>
 <!-- End Support Section -->

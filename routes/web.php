@@ -30,6 +30,9 @@ use App\Http\Controllers\Agency\TinRegistrationController;
 use App\Http\Controllers\Agency\NinValidationController;
 use App\Http\Controllers\Agency\NinModificationController;
 use App\Http\Controllers\Agency\IpeController;
+use App\Http\Controllers\Agency\TravelController;
+use App\Http\Controllers\Agency\HotelController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -227,6 +230,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/', [ManualSearchController::class, 'store'])->name('phone.search.store');
         Route::get('/{id}/details', [ManualSearchController::class, 'showDetails'])->name('phone.search.details');
     });
+
+    // Travel Services
+    Route::prefix('travel')->group(function () {
+        Route::get('/', [TravelController::class, 'index'])->name('travel.index');
+        Route::post('/', [TravelController::class, 'store'])->name('travel.store');
+        Route::get('/fields/{serviceId}', [TravelController::class, 'getServiceFields'])->name('travel.fields');
+    });
+
+    // Hotel Services
+    Route::prefix('hotel')->group(function () {
+        Route::get('/', [HotelController::class, 'index'])->name('hotel.index');
+        Route::post('/', [HotelController::class, 'store'])->name('hotel.store');
+    });
 });
+
 
 require __DIR__.'/auth.php';

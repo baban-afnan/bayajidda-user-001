@@ -1,5 +1,5 @@
 <x-app-layout>
-    <title>Digital Verify - Support Center</title>
+    <title>Baya Jidda - Support Center</title>
 
     <div class="page-body">
         <div class="container-fluid">

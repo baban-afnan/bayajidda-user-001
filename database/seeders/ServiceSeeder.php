@@ -138,6 +138,17 @@ class ServiceSeeder extends Seeder
                 ['name' => 'IPE Clearance', 'code' => '002', 'price' => 3000],
             ]);
 
+            // Travel Services
+            ServiceManager::getServiceWithFields('TRAVEL', [
+                ['name' => 'Nigeria to Outside', 'code' => '700', 'price' => 1000],
+                ['name' => 'Inside Nigeria', 'code' => '701', 'price' => 1000],
+            ]);
+
+            // Hotel Services
+            ServiceManager::getServiceWithFields('HOTEL', [
+                ['name' => 'Hotel Reservation', 'code' => '710', 'price' => 1000],
+            ]);
+
         
     }
 }

@@ -1,5 +1,5 @@
 <x-app-layout>
-    <title>Digital Verify - {{ $title ?? 'Verify BVN' }}</title>
+    <title>Baya Jidda - {{ $title ?? 'Verify BVN' }}</title>
     <div class="page-body">
         <div class="container-fluid">
             <div class="page-title mb-3">

@@ -1,5 +1,5 @@
 <x-app-layout>
-    <title>Digital Verify - {{ $title ?? 'Dashboard' }}</title>
+    <title>Baya Jidda - {{ $title ?? 'Dashboard' }}</title>
 
     <!-- Announcement Banner -->
     @if(isset($announcement) && $announcement)
@@ -150,6 +150,8 @@
                             ['route' => route('bvn-crm'), 'icon' => 'ti-user-plus', 'color' => 'bg-info', 'name' => 'BVN CRM'],
                             ['route' => route('phone.search.index'), 'icon' => 'ti-user-plus', 'color' => 'bg-success', 'name' => 'BVN Search'],
                             ['route' => route('support'), 'icon' => 'ti-message-plus', 'color' => 'bg-info', 'name' => 'Support'],
+                            ['route' => route('travel.index'), 'icon' => 'ti-plane', 'color' => 'bg-warning', 'name' => 'Travel'],
+                            ['route' => route('hotel.index'), 'icon' => 'ti-home', 'color' => 'bg-success', 'name' => 'Hotel Booking'],
                         ];
                     @endphp
 

@@ -70,15 +70,27 @@ class AgentService extends Model
         'house_number',
         'street_name',
         'country',
+        'from_country',
+        'to_country',
         'cac_certificate',
         'company_type',
-        'modification_data',
+        'departure_date',
+        'return_date',
+        'trip_type',
+        'visa_type',
+        'applicant_class',
     ];
+
+
+
 
     protected $casts = [
         'submission_date' => 'datetime',
-        'modification_data' => 'array',
+        'departure_date' => 'date',
+        'return_date' => 'date',
     ];
+
+
 
     /** Relationships */
 

@@ -65,14 +65,23 @@
 
         function handleModalOpen(event) {
             const button = event.relatedTarget;
-            const comment = button.getAttribute('data-comment');
-            const fileUrl = button.getAttribute('data-file-url');
+            const comment = button.getAttribute('data-comment') || '';
+            let fileUrl = button.getAttribute('data-file-url');
             const approvedBy = button.getAttribute('data-approved-by');
+
+            // AREWA SMART: Try to extract file URL from comment if not explicitly provided
+            if (!fileUrl || fileUrl === 'null' || fileUrl.trim() === '') {
+                const urlMatch = comment.match(/https?:\/\/[^\s]+/);
+                if (urlMatch) {
+                    fileUrl = urlMatch[0];
+                }
+            }
 
             populateModalContent(comment, approvedBy);
             handleDownloadButton(fileUrl);
             displayEncouragement();
         }
+
 
         function populateModalContent(comment, approvedBy) {
             let content = comment || 'No comment available.';

@@ -1,5 +1,5 @@
 <x-app-layout>
-    <title>Digital Verify - Buy Educational Pin</title>
+    <title>Baya Jidda - Buy Educational Pin</title>
 
     <!-- Start::row-1 -->
     <div class="row">

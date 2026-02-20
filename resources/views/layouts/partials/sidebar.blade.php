@@ -3,7 +3,7 @@
     <!-- Logo -->
     <div class="sidebar-logo">
         <a href="{{ route('dashboard') }}" class="logo logo-normal">
-            <img src="{{ asset('assets/images/logo/logo.png') }}" alt="Logo" style="height: 50px;">
+            <img src="{{ asset('assets/images/logo/logo.png') }}" alt="Logo" style="height: 40px;">
         </a>
         <a href="{{ route('dashboard') }}" class="logo-small">
             <img src="{{ asset('assets/images/logo/logo.png') }}" alt="Logo">
@@ -88,6 +88,33 @@
                         <li><a href="{{ route('tin.index') }}" class="{{ request()->routeIs('tin.index') ? 'active' : '' }}">Verify TIN</a></li>
                         <li><a href="{{ route('nin.phone.index') }}" class="{{ request()->routeIs('nin.phone.index') ? 'active' : '' }}">Verify NIN phone No</a></li>
                         <li><a href="{{ route('nin.demo.index') }}" class="{{ request()->routeIs('nin.demo.index') ? 'active' : '' }}">Verify NIN Demo</a></li>
+                    </ul>
+                </li>
+
+                 <!-- Travel and hotel -->
+                <li class="submenu">
+                    <a href="javascript:void(0);">
+                        <i class="ti ti-plane"></i>
+                        <span>Travel & Hotel</span>
+                        <span class="menu-arrow"></span>
+                      </a>
+                    <ul>
+                        <li><a href="{{ route('travel.index') }}" class="{{ request()->routeIs('travel.index') ? 'active' : '' }}">Travel</a></li>
+                        <li><a href="{{ route('hotel.index') }}" class="{{ request()->routeIs('hotel.index') ? 'active' : '' }}">Hotel</a></li>
+                    </ul>
+
+                </li>
+
+                  <!-- Esims and other services -->
+                <li class="submenu">
+                    <a href="javascript:void(0);">
+                        <i class="ti ti-phone-plus"></i>
+                        <span>Esim card</span>
+                        <span class="menu-arrow"></span>
+                      </a>
+                    <ul>
+                        <li><a href="#">Kirani</a></li>
+                        <li><a href="#">ummita</a></li>
                     </ul>
                 </li>
 

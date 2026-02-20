@@ -1,5 +1,5 @@
 <x-app-layout>
-    <title>Imam Data Sub- {{ $title ?? 'BVN Modification' }}</title>
+    <title>Baya Jidda - {{ $title ?? 'BVN Modification' }}</title>
     <div class="page-body">
         <div class="container-fluid">
             <div class="page-title mb-3">

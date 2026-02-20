@@ -1,5 +1,5 @@
 <x-app-layout>
-    <title>Digital Verify - Pay Electricity Bill</title>
+    <title>Baya Jidda - Pay Electricity Bill</title>
 
     <div class="row">
         <div class="col-xxl-12 col-xl-12">
