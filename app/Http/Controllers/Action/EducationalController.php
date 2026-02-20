@@ -44,14 +44,6 @@ class EducationalController extends Controller
 
         // Load pin variations
         $pins = DB::table('data_variations')->whereIn('service_id', ['waec', 'waec-registration'])->get();
-
-        // Fetch purchase history
-        $history = \App\Models\Report::where('user_id', $user->id)
-            ->where('type', 'education')
-            ->latest()
-            ->paginate(10);
-
-        return view('utilities.buy-educational-pin')->with(compact('pins', 'wallet', 'history'));
     }
 
     /**

@@ -130,53 +130,144 @@
             </div>
         </div>
 
-        <!-- Services Section -->
+        <!-- Quick Services Section -->
         <section class="py-4">
-            <div class="container">
-                <div class="row service-grid justify-content-center">
-                    @php
-                        $services = [
-                            ['route' => route('wallet'), 'icon' => 'ti-wallet', 'color' => 'bg-primary', 'name' => 'Wallet'],
-                            ['route' => route('airtime'), 'icon' => 'ti-phone-call', 'color' => 'bg-info', 'name' => 'Airtime'],
-                            ['route' => route('buy-data'), 'icon' => 'ti-world', 'color' => 'bg-warning', 'name' => 'Data'],
-                            ['route' => route('buy-sme-data'), 'icon' => 'ti-world', 'color' => 'bg-success', 'name' => 'SME Data'],
-                            ['route' => route('electricity'), 'icon' => 'ti-bolt', 'color' => 'bg-danger', 'name' => 'Electricity'],
-                            ['modal' => '#verifyModal', 'icon' => 'ti-id-badge', 'color' => 'bg-primary', 'name' => 'Verify NIN'],
-                            ['modal' => '#verifyBVNModal', 'icon' => 'ti-id-badge', 'color' => 'bg-info', 'name' => 'Verify (BVN / TIN)'],
-                            ['route' => route('nin-validation'), 'icon' => 'ti-user-plus', 'color' => 'bg-warning', 'name' => 'Validation'],
-                            ['route' => route('ipe.index'), 'icon' => 'ti-user-plus', 'color' => 'bg-danger', 'name' => 'IPE'],
-                            ['route' => route('modification'), 'icon' => 'ti-user-plus', 'color' => 'bg-primary', 'name' => 'BVN Modification'],
-                            ['route' => route('nin-modification'), 'icon' => 'ti-user-plus', 'color' => 'bg-success', 'name' => 'NIN Modification'],
-                            ['route' => route('bvn-crm'), 'icon' => 'ti-user-plus', 'color' => 'bg-info', 'name' => 'BVN CRM'],
-                            ['route' => route('phone.search.index'), 'icon' => 'ti-user-plus', 'color' => 'bg-success', 'name' => 'BVN Search'],
-                            ['route' => route('support'), 'icon' => 'ti-message-plus', 'color' => 'bg-info', 'name' => 'Support'],
-                            ['route' => route('travel.index'), 'icon' => 'ti-plane', 'color' => 'bg-warning', 'name' => 'Travel'],
-                            ['route' => route('hotel.index'), 'icon' => 'ti-home', 'color' => 'bg-success', 'name' => 'Hotel Booking'],
-                        ];
-                    @endphp
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="fas fa-bolt text-warning"></i>
+                        <h5 class="fw-bold mb-0">Quick Services</h5>
+                    </div>
+                    <p class="text-muted small mb-4">Instant access to popular payments</p>
 
-                    @foreach ($services as $sv)
-                        <div class="col-4 col-md-2 d-flex">
-                            <a @if(isset($sv['route'])) href="{{ $sv['route'] }}" 
-                               @elseif(isset($sv['modal'])) href="#" data-bs-toggle="modal" data-bs-target="{{ $sv['modal'] }}"
-                               @else href="#" @endif class="w-100">
-                                <div class="card flex-fill shadow-sm text-center border-0 rounded-3 service-card {{ $sv['color'] ?? 'bg-white' }}">
-                                    <div class="card-body p-3 d-flex flex-column align-items-center">
-                                        <span class="avatar rounded-circle bg-white bg-opacity-25 mb-2 p-3">
-                                            <i class="ti {{ $sv['icon'] }} text-white fs-18"></i>
-                                        </span>
-                                        <h6 class="fs-13 fw-semibold text-white mb-0">{{ $sv['name'] }}</h6>
-                                    </div>
+                    <div class="row row-cols-3 row-cols-md-6 g-4 text-center">
+                        <!-- Fund Wallet -->
+                        <div class="col">
+                            <a href="{{ route('wallet') }}" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-wallet fs-24 text-primary"></i>
                                 </div>
+                                <span class="fs-13 fw-medium text-dark d-block">Fund Wallet</span>
                             </a>
                         </div>
-                    @endforeach
+
+                        <!-- Airtime -->
+                        <div class="col">
+                            <a href="{{ route('airtime') }}" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-phone-call fs-24 text-info"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">Airtime</span>
+                            </a>
+                        </div>
+
+                        <!-- Data -->
+                        <div class="col">
+                            <a href="{{ route('buy-data') }}" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-world fs-24 text-warning"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">Data</span>
+                            </a>
+                        </div>
+
+                        <!-- SME Data -->
+                        <div class="col">
+                            <a href="{{ route('buy-sme-data') }}" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-device-gamepad fs-24 text-success"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">SME Data</span>
+                            </a>
+                        </div>
+
+                        <!-- Electricity -->
+                        <div class="col">
+                            <a href="{{ route('electricity') }}" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-bolt fs-24 text-danger"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">Electricity</span>
+                            </a>
+                        </div>
+
+                        <!-- Education -->
+                        <div class="col">
+                            <a href="{{ route('education') }}" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-school fs-24 text-primary"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">Education</span>
+                            </a>
+                        </div>
+
+                        <!-- BVN Services -->
+                        <div class="col">
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#bvnServicesModal" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <img src="https://img.icons8.com/color/48/bank-card-back-side.png" class="service-img-icon" alt="BVN">
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">BVN Services</span>
+                            </a>
+                        </div>
+
+                        <!-- NIN Services -->
+                        <div class="col">
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#ninServicesModal" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <img src="https://img.icons8.com/color/48/identification-documents.png" class="service-img-icon" alt="NIN">
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">NIN Services</span>
+                            </a>
+                        </div>
+
+                        <!-- Verify -->
+                        <div class="col">
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#verifyModal" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-id-badge fs-24 text-secondary"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">Verify</span>
+                            </a>
+                        </div>
+
+                        <!-- Hotel -->
+                        <div class="col">
+                            <a href="{{ route('hotel.index') }}" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-home-plus fs-24 text-success"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">Hotel</span>
+                            </a>
+                        </div>
+
+                        <!-- Travel -->
+                        <div class="col">
+                            <a href="{{ route('travel.index') }}" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-plane fs-24 text-success"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">Travel</span>
+                            </a>
+                        </div>
+
+                        <!-- Support -->
+                        <div class="col">
+                            <a href="{{ route('support') }}" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-headset fs-24 text-info"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">Support</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
+
         <!-- Transactions & Statistics Row -->
-        <div class="row g-4">
+        <div class="row g-4 d-none d-lg-flex">
             <!-- Recent Transactions -->
             <div class="col-xxl-8 col-xl-7 d-flex">
                 <div class="card flex-fill border-0 shadow-sm rounded-4 overflow-hidden">
@@ -314,91 +405,114 @@
     <!-- Verify Modal -->
     <div class="modal fade" id="verifyModal" tabindex="-1" aria-labelledby="verifyModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 shadow-lg border-0">
-                <div class="modal-header bg-primary text-white py-3">
-                    <h5 class="modal-title fw-bold text-white d-flex align-items-center gap-2" id="verifyModalLabel">
-                        <i class="ti ti-id-badge fs-3 text-white"></i>
-                        NIN Verification
+            <div class="modal-content modal-verif">
+                <div class="modal-header text-white">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="verifyModalLabel">
+                        <i class="ti ti-id-badge fs-3"></i>
+                        Verification Services
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4">
-                    @php
-                        $verifyServices = [
-                            ['route' => route('nin.verification.index'), 'icon' => 'ti-fingerprint', 'color' => 'bg-primary', 'name' => 'Verify NIN'],
-                            ['route' => route('nin.phone.index'), 'icon' => 'ti-credit-card', 'color' => 'bg-info', 'name' => 'Verify Phone No'],
-                            ['route' => route('nin.demo.index'), 'icon' => 'ti-credit-card', 'color' => 'bg-secondary', 'name' => 'Verify DEMO'],
-                        ];
-                    @endphp
-
-                    <div class="row service-grid justify-content-center">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        @php
+                            $verifyServices = [
+                                ['route' => route('nin.verification.index'), 'icon' => 'ti-fingerprint', 'bg' => 'icon-bg-primary', 'name' => 'Verify NIN'],
+                                ['route' => route('nin.phone.index'), 'icon' => 'ti-phone', 'bg' => 'icon-bg-info', 'name' => 'Verify Phone No'],
+                                ['route' => route('nin.demo.index'), 'icon' => 'ti-user-check', 'bg' => 'icon-bg-secondary', 'name' => 'Verify DEMO'],
+                                ['route' => route('bvn.verification.index'), 'icon' => 'ti-shield-check', 'bg' => 'icon-bg-success', 'name' => 'Verify BVN'],
+                                ['route' => route('tin.index'), 'icon' => 'ti-briefcase', 'bg' => 'icon-bg-warning', 'name' => 'Verify TIN'],
+                            ];
+                        @endphp
                         @foreach ($verifyServices as $sv)
-                            <div class="col-4 d-flex">
-                                <a href="{{ $sv['route'] }}" class="w-100">
-                                    <div class="card flex-fill shadow-sm text-center border-0 rounded-3 service-card {{ $sv['color'] ?? 'bg-white' }}">
-                                        <div class="card-body p-3 d-flex flex-column align-items-center">
-                                            <span class="avatar rounded-circle bg-white bg-opacity-25 mb-2 p-3">
-                                                <i class="ti {{ $sv['icon'] }} text-white fs-18"></i>
-                                            </span>
-                                            <h6 class="fs-13 fw-semibold text-white mb-0">{{ $sv['name'] }}</h6>
-                                        </div>
+                            <div class="col-4">
+                                <a href="{{ $sv['route'] }}" class="modal-service-card">
+                                    <div class="modal-service-icon {{ $sv['bg'] }}">
+                                        <i class="ti {{ $sv['icon'] }}"></i>
                                     </div>
+                                    <h6 class="modal-service-title">{{ $sv['name'] }}</h6>
                                 </a>
                             </div>
                         @endforeach
                     </div>
                 </div>
-                <div class="modal-footer p-3">
-                    <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">Close</button>
-                </div>
             </div>
         </div>
     </div>
 
-
-
-      <!-- Verify Modal -->
-    <div class="modal fade" id="verifyBVNModal" tabindex="-1" aria-labelledby="verifyModalLabel" aria-hidden="true">
+    <!-- BVN Services Modal -->
+    <div class="modal fade" id="bvnServicesModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 shadow-lg border-0">
-                <div class="modal-header bg-primary text-white py-3">
-                    <h5 class="modal-title fw-bold text-white d-flex align-items-center gap-2" id="verifyModalLabel">
-                        <i class="ti ti-id-badge fs-3 text-white"></i>
-                        BVN / TIN Verification
+            <div class="modal-content modal-bvn">
+                <div class="modal-header text-white">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
+                        <i class="ti ti-id-badge fs-3"></i>
+                        BVN Services
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4">
-                    @php
-                        $verifyServices = [
-                            ['route' => route('bvn.verification.index'), 'icon' => 'ti-fingerprint', 'color' => 'bg-primary', 'name' => 'Verify BVN'],
-                            ['route' => route('tin.index'), 'icon' => 'ti-credit-card', 'color' => 'bg-info', 'name' => 'Verify TIN'],
-                        ];
-                    @endphp
-
-                    <div class="row service-grid justify-content-center">
-                        @foreach ($verifyServices as $sv)
-                            <div class="col-4 d-flex">
-                                <a href="{{ $sv['route'] }}" class="w-100">
-                                    <div class="card flex-fill shadow-sm text-center border-0 rounded-3 service-card {{ $sv['color'] ?? 'bg-white' }}">
-                                        <div class="card-body p-3 d-flex flex-column align-items-center">
-                                            <span class="avatar rounded-circle bg-white bg-opacity-25 mb-2 p-3">
-                                                <i class="ti {{ $sv['icon'] }} text-white fs-18"></i>
-                                            </span>
-                                            <h6 class="fs-13 fw-semibold text-white mb-0">{{ $sv['name'] }}</h6>
-                                        </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        @php
+                            $bvnServices = [
+                                ['route' => route('modification'), 'icon' => 'ti-edit', 'bg' => 'icon-bg-primary', 'name' => 'Modification'],
+                                ['route' => route('bvn-crm'), 'icon' => 'ti-headset', 'bg' => 'icon-bg-info', 'name' => 'BVN CRM'],
+                                ['route' => route('phone.search.index'), 'icon' => 'ti-search', 'bg' => 'icon-bg-success', 'name' => 'BVN Search'],
+                            ];
+                        @endphp
+                        @foreach ($bvnServices as $sv)
+                            <div class="col-4">
+                                <a href="{{ $sv['route'] }}" class="modal-service-card">
+                                    <div class="modal-service-icon {{ $sv['bg'] }}">
+                                        <i class="ti {{ $sv['icon'] }}"></i>
                                     </div>
+                                    <h6 class="modal-service-title">{{ $sv['name'] }}</h6>
                                 </a>
                             </div>
                         @endforeach
                     </div>
                 </div>
-                <div class="modal-footer p-3">
-                    <button type="button" class="btn btn-primary px-4" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NIN Services Modal -->
+    <div class="modal fade" id="ninServicesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-nin">
+                <div class="modal-header text-white">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
+                        <i class="ti ti-id-badge fs-3"></i>
+                        NIN Services
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        @php
+                            $ninServices = [
+                                ['route' => route('nin-validation'), 'icon' => 'ti-check', 'bg' => 'icon-bg-warning', 'name' => 'Validation'],
+                                ['route' => route('nin-modification'), 'icon' => 'ti-edit', 'bg' => 'icon-bg-success', 'name' => 'Modification'],
+                                ['route' => route('ipe.index'), 'icon' => 'ti-users', 'bg' => 'icon-bg-danger', 'name' => 'IPE Services'],
+                            ];
+                        @endphp
+                        @foreach ($ninServices as $sv)
+                            <div class="col-4">
+                                <a href="{{ $sv['route'] }}" class="modal-service-card">
+                                    <div class="modal-service-icon {{ $sv['bg'] }}">
+                                        <i class="ti {{ $sv['icon'] }}"></i>
+                                    </div>
+                                    <h6 class="modal-service-title">{{ $sv['name'] }}</h6>
+                                </a>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+
 
 
     
