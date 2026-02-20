@@ -228,10 +228,6 @@
                             <p>Request ID</p>
                             <h6>{{ session('request_id', 'N/A') }}</h6>
                         </div>
-                    </div>
-
-                    <div class="detail-box">
-                        <h6 class="section-label">Payment Breakdown</h6>
                         @if(session('amount'))
                         <div class="detail-item">
                             <p>Value</p>
