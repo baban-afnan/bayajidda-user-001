@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Agency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Models\AgentService;
 use App\Models\Service;
 use App\Models\ServiceField;
@@ -15,24 +17,19 @@ use App\Http\Controllers\Controller;
 class BvnServicesController extends Controller
 {
     /**
-     * Display the service form and submission history (CRM or Send VNIN).
+     * Display the service form and submission history for CRM.
      */
     public function index(Request $request)
     {
         $user = Auth::user();
-        $routeName = $request->route()->getName();
-        $isSendVnin = ($routeName === 'send-vnin');
-        $serviceKey = $isSendVnin ? 'VNIN TO NIBSS' : 'CRM';
-
-        // Search field depends on service type
-        $searchField = $isSendVnin ? 'request_id' : 'batch_id';
+        $serviceKey = 'CRM';
 
         // Query only this user's submissions
         $submissions = AgentService::with('transaction')
             ->where('user_id', $user->id)
             ->where('service_name', $serviceKey)
             ->when($request->filled('search'), fn($q) =>
-                $q->where($searchField, 'like', "%{$request->search}%"))
+                $q->where('batch_id', 'like', "%{$request->search}%"))
             ->when($request->filled('status'), fn($q) =>
                 $q->where('status', $request->status))
             ->orderByRaw("
@@ -60,9 +57,8 @@ class BvnServicesController extends Controller
 
         $fields = $service?->fields ?? collect();
         $prices = $service?->prices ?? collect();
-        $view = $isSendVnin ? 'bvn.send-vnin' : 'bvn.crm';
 
-        return view($view, [
+        return view('bvn.crm', [
             'fieldname'     => $fields,
             'services'      => Service::where('is_active', true)->get(),
             'serviceName'   => $serviceKey,
@@ -73,46 +69,30 @@ class BvnServicesController extends Controller
     }
 
     /**
-     * Store submission for CRM or Send VNIN.
+     * Store submission for CRM.
      */
     public function store(Request $request)
     {
         $user = Auth::user();
-        $routeName = $request->route()->getName();
-        $isSendVnin = ($routeName === 'send-vnin.store');
-        $serviceKey = $isSendVnin ? 'sendvnin' : 'CRM';
+        $serviceKey = 'CRM';
 
-        // Validation rules per service
+        // 1. Validation
         $rules = [
             'field_code' => 'required|exists:service_fields,id',
+            'ticket_id'  => 'required|string|size:8|regex:/^[0-9]{8}$/',
+            'batch_id'   => 'required|string|size:7|regex:/^[0-9]{7}$/',
         ];
-
-        if ($isSendVnin) {
-            $rules += [
-                'request_id' => 'required|string|size:7|regex:/^[0-9]{7}$/',
-                'bvn'        => 'required|string|size:11|regex:/^[0-9]{11}$/',
-                'nin'        => 'required|string|size:11|regex:/^[0-9]{11}$/',
-                'field'      => 'required|string',
-            ];
-        } else {
-            $rules += [
-                'ticket_id' => 'required|string|size:8|regex:/^[0-9]{8}$/',
-                'batch_id'  => 'required|string|size:7|regex:/^[0-9]{7}$/',
-            ];
-        }
 
         $validated = $request->validate($rules);
 
+        // 2. Fetch Service Field and Price
         $serviceField = ServiceField::with(['service', 'prices'])->findOrFail($validated['field_code']);
         $serviceName = $serviceField->service->name;
         $fieldName = $serviceField->field_name;
 
-        //  Determine correct price for user
         $servicePrice = $serviceField->prices
             ->where('user_type', $user->role)
             ->first()?->price ?? $serviceField->base_price;
-
-        $totalAmount = $servicePrice; // You can expand this if future surcharges apply
 
         if ($servicePrice === null) {
             return back()->with([
@@ -121,78 +101,56 @@ class BvnServicesController extends Controller
             ])->withInput();
         }
 
-        $wallet = Wallet::where('user_id', $user->id)->firstOrFail();
-
-        if ($wallet->status !== 'active') {
-            return back()->with(['status' => 'error', 'message' => 'Your wallet is not active.'])->withInput();
-        }
-
-        if ($wallet->balance < $totalAmount) {
-            return back()->with([
-                'status'  => 'error',
-                'message' => 'Insufficient balance. You need NGN ' .
-                    number_format($totalAmount - $wallet->balance, 2) . ' more.'
-            ])->withInput();
-        }
-
         DB::beginTransaction();
 
         try {
-            $reference = 'BVN' . date('is') . strtoupper(substr(uniqid(mt_rand(), true), -5));
-            $performedBy = trim($user->first_name . ' ' . $user->last_name);
+            // 3. Lock Wallet and Check Wallet Status
+            $wallet = Wallet::where('user_id', $user->id)->lockForUpdate()->firstOrFail();
 
-            //  Capture complete transaction metadata
-            $fullMetadata = [
-                'service_key'   => $serviceKey,
-                'field_details' => [
-                    'id'         => $serviceField->id,
-                    'name'       => $fieldName,
-                    'code'       => $serviceField->field_code,
-                ],
-                'user_details'  => [
-                    'id'    => $user->id,
-                    'name'  => $performedBy,
-                    'role'  => $user->role,
-                    'email' => $user->email,
-                ],
-                'request_data'  => $validated,
-                'pricing'       => [
-                    'unit_price'  => $servicePrice,
-                    'total_amount' => $totalAmount,
-                ],
-                'wallet_before' => $wallet->balance,
-                'transaction_time' => now()->toDateTimeString(),
-                'channel' => $isSendVnin ? 'Send VNIN Portal' : 'CRM Dashboard',
-            ];
+            if ($wallet->status !== 'active') {
+                throw new \Exception('Your wallet is not active.');
+            }
 
-            //  Create transaction
+            // 4. Check Balance
+            if ($wallet->balance < $servicePrice) {
+                throw new \Exception('Insufficient balance. You need NGN ' . number_format($servicePrice - $wallet->balance, 2) . ' more.');
+            }
+
+            $reference = 'CRM' . date('is') . strtoupper(substr(uniqid(mt_rand(), true), -5));
+            $performedBy = trim($user->first_name . ' ' . ($user->last_name ?? $user->surname));
+
+            // 5. Create Transaction Record
             $transaction = Transaction::create([
                 'transaction_ref' => $reference,
                 'user_id'         => $user->id,
-                'amount'          => $totalAmount,
+                'amount'          => $servicePrice,
                 'performed_by'    => $performedBy,
                 'description'     => "{$serviceName} Request for {$fieldName}",
                 'type'            => 'debit',
                 'status'          => 'completed',
-                'metadata'        => $fullMetadata, // full trace
+                'metadata'        => [
+                    'service_key'   => $serviceKey,
+                    'field_details' => [
+                        'id'   => $serviceField->id,
+                        'name' => $fieldName,
+                        'code' => $serviceField->field_code,
+                    ],
+                    'request_data'  => $validated,
+                ],
             ]);
 
-            //  Create main submission record with amount_paid
+            // 6. Create AgentService Record
             AgentService::create([
                 'reference'       => $reference,
                 'user_id'         => $user->id,
                 'service_id'      => $serviceField->service_id,
-                'service_field_id'  => $serviceField->id,
+                'service_field_id' => $serviceField->id,
                 'field_code'      => $serviceField->field_code,
                 'service_name'    => $serviceName,
                 'field_name'      => $fieldName,
-                'ticket_id'       => $validated['ticket_id'] ?? null,
-                'batch_id'        => $validated['batch_id'] ?? null,
-                'request_id'      => $validated['request_id'] ?? null,
-                'bvn'             => $validated['bvn'] ?? null,
-                'nin'             => $validated['nin'] ?? null,
-                'field'           => $validated['field'] ?? null,
-                'amount'          => $totalAmount, 
+                'ticket_id'       => $validated['ticket_id'],
+                'batch_id'        => $validated['batch_id'],
+                'amount'          => $servicePrice,
                 'performed_by'    => $performedBy,
                 'transaction_id'  => $transaction->id,
                 'submission_date' => now(),
@@ -200,27 +158,163 @@ class BvnServicesController extends Controller
                 'service_type'    => $serviceName,
             ]);
 
-            //  Deduct wallet after record creation
-            $wallet->decrement('balance', $totalAmount);
+            // 7. Deduct Wallet Balance
+            $wallet->decrement('balance', $servicePrice);
+
+            // 8. Call API
+            $apiKey = env('AREWA_API_TOKEN');
+            $apiBaseUrl = env('AREWA_BASE_URL');
+            $apiUrl = rtrim($apiBaseUrl, '/') . '/bvn/crm';
+
+            $response = Http::withToken($apiKey)
+                ->acceptJson()
+                ->post($apiUrl, [
+                    'field_code' => $serviceField->field_code,
+                    'ticket_id'  => $validated['ticket_id'],
+                    'batch_id'   => $validated['batch_id'],
+                ]);
+
+            $decodedData = $response->json();
+
+            // 9. Handle API Failure (Rollback)
+            if (!$response->successful() || (isset($decodedData['success']) && $decodedData['success'] === false) || (isset($decodedData['status']) && $decodedData['status'] === 'error')) {
+                Log::error('BVN CRM API Failure', [
+                    'reference' => $reference,
+                    'response'  => $decodedData,
+                    'status'    => $response->status()
+                ]);
+                throw new \Exception('Transaction failed: ' . ($decodedData['message'] ?? 'Could not complete API request.'));
+            }
+
+            // 10. Update records with API Result and Commit
+            $apiReference = $decodedData['data']['reference'] ?? $reference;
+            
+            // If API returned a different reference, update the records
+            if ($apiReference !== $reference) {
+                $transaction->update(['transaction_ref' => $apiReference]);
+                $agentService = AgentService::where('reference', $reference)->first();
+                if ($agentService) {
+                    $agentService->update(['reference' => $apiReference]);
+                }
+            }
+
+            $transactionMetadata = $transaction->metadata;
+            $transactionMetadata['api_response'] = $decodedData;
+            $transaction->update(['metadata' => $transactionMetadata]);
 
             DB::commit();
 
-            $redirectRoute = $isSendVnin ? 'send-vnin' : 'bvn-crm';
-
-            return redirect()->route($redirectRoute)->with([
+            return redirect()->route('bvn-crm')->with([
                 'status'  => 'success',
-                'message' => "{$serviceKey} request submitted successfully. Ref: {$reference}. Charged: ₦" .
-                    number_format($totalAmount, 2),
+                'message' => "CRM request submitted successfully. Ref: {$apiReference}. Charged: ₦" . number_format($servicePrice, 2),
             ]);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            report($e);
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+            Log::error('BVN CRM Store Exception', [
+                'user_id' => $user->id,
+                'error'   => $e->getMessage()
+            ]);
 
             return back()->with([
                 'status'  => 'error',
-                'message' => 'Submission failed: ' . $e->getMessage(),
+                'message' => $e->getMessage(),
             ])->withInput();
         }
+    }
+
+    /**
+     * Check the status of a CRM submission.
+     */
+    public function checkStatus($id)
+    {
+        $submission = AgentService::findOrFail($id);
+
+        try {
+            $apiKey = env('AREWA_API_TOKEN');
+            $apiBaseUrl = 'https://api.arewasmart.com.ng/api/v1'; // Correct API base URL
+            $apiUrl = rtrim($apiBaseUrl, '/') . '/bvn/crm';
+
+            // Polling is possible using reference, batch_id, or ticket_id.
+            // We'll prioritize reference as it's the most specific.
+            $params = [];
+            if ($submission->reference) {
+                $params['reference'] = $submission->reference;
+            } elseif ($submission->batch_id) {
+                $params['batch_id'] = $submission->batch_id;
+            } elseif ($submission->ticket_id) {
+                $params['ticket_id'] = $submission->ticket_id;
+            }
+
+            $response = Http::withToken($apiKey)
+                ->acceptJson()
+                ->get($apiUrl, $params);
+
+            $apiResponse = $response->json();
+
+            // The API documentation says we poll status using GET.
+            // We update the database with the response message comment and status.
+            if ($response->successful()) {
+                $data = $apiResponse['data'] ?? [];
+                
+                $updateData = [];
+
+                // Update status if present in data
+                if (isset($data['status'])) {
+                    $updateData['status'] = $this->normalizeStatus($data['status']);
+                }
+                
+                // Update comment/message from response.
+                // Priority: comment > message > reason
+                if (isset($data['comment'])) {
+                    $updateData['comment'] = $data['comment'];
+                } elseif (isset($apiResponse['message'])) {
+                    $updateData['comment'] = $apiResponse['message'];
+                } elseif (isset($data['reason'])) {
+                    $updateData['comment'] = $data['reason'];
+                }
+
+                // Map file url if provided
+                if (isset($data['file_url'])) {
+                    $updateData['file_url'] = $data['file_url'];
+                }
+
+                if (!empty($updateData)) {
+                    $submission->update($updateData);
+                }
+
+                return back()->with([
+                    'status' => 'success',
+                    'message' => 'Status updated successfully. Current status: ' . ucfirst($submission->status)
+                ]);
+            }
+
+            return back()->with([
+                'status' => 'error',
+                'message' => 'Unable to fetch status: ' . ($apiResponse['message'] ?? 'Unknown error.')
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('BVN CRM Status Check Error', ['error' => $e->getMessage()]);
+            return back()->with([
+                'status' => 'error',
+                'message' => 'Connection Error: Unable to reach service provider.'
+            ]);
+        }
+    }
+
+    private function normalizeStatus($status): string
+    {
+        $s = strtolower(trim((string) $status));
+        
+        return match ($s) {
+            'successful', 'success', 'resolved', 'approved', 'completed' => 'successful',
+            'processing', 'in_progress', 'in-progress', 'submitted', 'new' => 'processing',
+            'failed', 'rejected', 'error', 'declined', 'invalid', 'no record' => 'failed',
+            'query', 'queried' => 'query',
+            default => 'pending',
+        };
     }
 }

@@ -1,12 +1,12 @@
 <x-app-layout>
-    <title>Baya Jidda - Travel Application</title>
+    <title>Baya Jidda - Visa Application</title>
     <div class="page-body">
         <div class="container-fluid">
             <div class="page-title mb-3">
                 <div class="row">
                     <div class="col-sm-6 col-12">
-                        <h3 class="fw-bold text-primary">Flight Ticket</h3>
-                        <p class="text-muted small mb-0">Apply for domestic and international travel services.</p>
+                        <h3 class="fw-bold text-primary">Visa Application</h3>
+                        <p class="text-muted small mb-0">Apply for international visa services.</p>
                     </div>
                 </div>
             </div>
@@ -14,11 +14,11 @@
 
         <div class="container-fluid mt-3">
             <div class="row">
-                <!-- Travel Application Form -->
+                <!-- Visa Application Form -->
                 <div class="col-xl-6 mb-4">
                     <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
                         <div class="card-header bg-primary text-white py-3">
-                            <h5 class="mb-0 fw-bold text-white"><i class="ti ti-plane-departure me-2"></i>flight Application Form</h5>
+                            <h5 class="mb-0 fw-bold text-white"><i class="ti ti-passport me-2"></i>Visa Application Form</h5>
                         </div>
 
                         <div class="card-body p-4">
@@ -41,14 +41,14 @@
                                 </div>
                             @endif
 
-                            <form method="POST" action="{{ route('travel.store') }}" class="row g-4" enctype="multipart/form-data">
+                            <form method="POST" action="{{ route('visa.store') }}" class="row g-4" enctype="multipart/form-data">
                                 @csrf
 
                                 <div class="col-md-6">
-                                    <label for="service_field" class="form-label fw-bold">Select Travel Type <span class="text-danger">*</span></label>
+                                    <label for="service_field" class="form-label fw-bold">Type of Visa <span class="text-danger">*</span></label>
                                     <select name="service_field" id="service_field" class="form-select border-primary-subtle" required>
-                                        <option value="">-- Choose Travel Type --</option>
-                                        @foreach($travelService->fields as $field)
+                                        <option value="">-- Choose Visa Type --</option>
+                                        @foreach($visaService->fields as $field)
                                             <option value="{{ $field->id }}" 
                                                     data-price="{{ $field->prices()->where('user_type', $role)->value('price') ?? $field->base_price }}"
                                                     data-description="{{ $field->description }}"
@@ -62,7 +62,15 @@
                                     </div>
                                 </div>
 
-
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Country to Apply <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="ti ti-map-pin"></i></span>
+                                        <input class="form-control" name="country_apply" type="text" required
+                                               placeholder="Destination Country"
+                                               value="{{ old('country_apply') }}">
+                                    </div>
+                                </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Gender <span class="text-danger">*</span></label>
@@ -96,68 +104,22 @@
                                     </div>
                                 </div>
 
-                                <div class="col-12" id="passport_upload_wrapper" style="display: none;">
+                                <div class="col-md-12">
                                     <label class="form-label fw-bold">International Passport Data Page <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light"><i class="ti ti-camera"></i></span>
-                                        <input class="form-control" name="passport_file" type="file" id="passport_file" accept=".pdf,.jpg,.jpeg,.png">
+                                        <input class="form-control" name="passport_file" type="file" required id="passport_file" accept=".pdf,.jpg,.jpeg,.png">
                                     </div>
-                                    <small class="text-muted">Required for international travel applications. Max 5MB (PDF or Image).</small>
+                                    <small class="text-muted">Max 5MB (PDF or Image).</small>
                                 </div>
 
-                                <div class="col-12">
-                                    <label class="form-label fw-bold">Trip Type <span class="text-danger">*</span></label>
-                                    <div class="d-flex gap-4">
-                                        <div class="form-check custom-radio">
-                                            <input class="form-check-input" type="radio" name="trip_type" id="one_way" value="one_way" {{ old('trip_type', 'one_way') == 'one_way' ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="one_way">One Way</label>
-                                        </div>
-                                        <div class="form-check custom-radio">
-                                            <input class="form-check-input" type="radio" name="trip_type" id="round_trip" value="round_trip" {{ old('trip_type') == 'round_trip' ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="round_trip">Round Trip (Go and Comeback)</label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">Departure Date <span class="text-danger">*</span></label>
+                                <div class="col-md-12">
+                                    <label class="form-label fw-bold">Passport Size Photo <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <span class="input-group-text bg-light"><i class="ti ti-calendar"></i></span>
-                                        <input class="form-control" name="departure_date" type="date" required
-                                               id="departure_date"
-                                               value="{{ old('departure_date') }}" min="{{ date('Y-m-d') }}">
+                                        <span class="input-group-text bg-light"><i class="ti ti-photo"></i></span>
+                                        <input class="form-control" name="photo_file" type="file" required id="photo_file" accept=".jpg,.jpeg,.png">
                                     </div>
-                                </div>
-
-                                <div class="col-md-6" id="return_date_wrapper" style="{{ old('trip_type') == 'round_trip' ? '' : 'display: none;' }}">
-                                    <label class="form-label fw-bold">Return Date <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light"><i class="ti ti-calendar"></i></span>
-                                        <input class="form-control" name="return_date" type="date" 
-                                               id="return_date"
-                                               value="{{ old('return_date') }}" min="{{ date('Y-m-d') }}">
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">From <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light"><i class="ti ti-map-pin"></i></span>
-                                        <input class="form-control" name="from_country" type="text" required
-                                               placeholder="Departure Point (e.g. Nigeria)"
-                                               value="{{ old('from_country') }}">
-                                    </div>
-                                </div>
-
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-bold">To <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light"><i class="ti ti-map-pin"></i></span>
-                                        <input class="form-control" name="to_country" type="text" required
-                                               placeholder="Destination"
-                                               value="{{ old('to_country') }}">
-                                    </div>
+                                    <small class="text-muted">Max 2MB (Image only).</small>
                                 </div>
 
                                 <div class="col-md-6">
@@ -181,12 +143,10 @@
                                 </div>
 
                                 <div class="col-12">
-                                    <label class="form-label fw-bold">Description <span class="text-danger">*</span></label>
-                                    <textarea name="description" rows="4" class="form-control border-primary-subtle" 
-                                              placeholder="Provide additional details about your travel" 
-                                              required>{{ old('description') }}</textarea>
+                                    <label class="form-label fw-bold">Additional Description (Optional)</label>
+                                    <textarea name="description" rows="3" class="form-control border-primary-subtle" 
+                                              placeholder="Provide additional details if any">{{ old('description') }}</textarea>
                                 </div>
-
 
                                 <div class="col-md-6 text-center">
                                     <label class="form-label fw-bold">Service Fee</label>
@@ -211,7 +171,7 @@
 
                                 <div class="col-12 d-grid">
                                     <button type="submit" class="btn btn-primary btn-lg shadow-sm hover-up">
-                                        <i class="ti ti-send me-2"></i> Submit Application
+                                        <i class="ti ti-send me-2"></i> Submit Visa Application
                                     </button>
                                 </div>
                             </form>
@@ -228,7 +188,7 @@
                             </h5>
                         </div>
                         <div class="card-body p-4">
-                            <form class="row g-3 mb-4 bg-light p-3 rounded-3 border" method="GET" action="{{ route('travel.index') }}">
+                            <form class="row g-3 mb-4 bg-light p-3 rounded-3 border" method="GET" action="{{ route('visa.index') }}">
                                 <div class="col-md-6">
                                     <input class="form-control border-0 shadow-sm" name="search" type="text" placeholder="Search reference, email or phone..." value="{{ request('search') }}">
                                 </div>
@@ -255,7 +215,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Reference</th>
-                                            <th>Route</th>
+                                            <th>Details</th>
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>
@@ -266,19 +226,17 @@
                                                 <td class="fw-bold text-muted">{{ $loop->iteration + $submissions->firstItem() - 1 }}</td>
                                                 <td><span class="text-primary fw-medium">{{ $submission->reference }}</span></td>
                                                 <td>
-                                                    <small class="d-block text-muted">From: {{ $submission->from_country ?? $submission->country }} To: {{ $submission->to_country ?? 'N/A' }}</small>
-                                                    <small class="d-block text-primary fw-bold">{{ str_replace('_', ' ', ucfirst($submission->trip_type ?? 'N/A')) }}</small>
-                                                    <small class="d-block text-muted">Class: {{ $submission->applicant_class ?? 'N/A' }} | Gender: {{ $submission->gender ?? 'N/A' }}</small>
-
-                                                    
-                                                    <small class="d-block text-muted mt-1">Dep: {{ $submission->departure_date ? $submission->departure_date->format('d M, Y') : 'N/A' }}</small>
-                                                    @if($submission->trip_type === 'round_trip')
-                                                        <small class="d-block text-muted">Ret: {{ $submission->return_date ? $submission->return_date->format('d M, Y') : 'N/A' }}</small>
-                                                    @endif
-
+                                                    <small class="d-block text-muted">To: {{ $submission->country }}</small>
+                                                    <small class="d-block text-primary fw-bold">{{ $submission->service_field_name }}</small>
+                                                    <small class="d-block text-muted">Class: {{ $submission->applicant_class }} | Gender: {{ $submission->gender }}</small>
                                                     @if($submission->passport_url)
                                                         <a href="{{ $submission->passport_url }}" target="_blank" class="btn btn-xs btn-outline-success mt-1 py-0 px-2" style="font-size: 0.65rem;">
                                                             <i class="ti ti-download me-1"></i>Passport
+                                                        </a>
+                                                    @endif
+                                                    @if($submission->file_url)
+                                                        <a href="{{ $submission->file_url }}" target="_blank" class="btn btn-xs btn-outline-info mt-1 py-0 px-2" style="font-size: 0.65rem;">
+                                                            <i class="ti ti-photo me-1"></i>Photo
                                                         </a>
                                                     @endif
                                                 </td>
@@ -305,7 +263,7 @@
                                             <tr>
                                                 <td colspan="5" class="text-center text-muted py-5">
                                                     <i class="ti ti-folder-off fs-1 d-block mb-3"></i>
-                                                    No travel applications found.
+                                                    No visa applications found.
                                                 </td>
                                             </tr>
                                         @endforelse
@@ -332,7 +290,6 @@
         .btn-icon { width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; }
         .table thead th { font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; }
         
-        /* Selection Visibility Fixes */
         .form-check-input:checked {
             background-color: #002fba !important;
             border-color: #002fba !important;
@@ -373,9 +330,7 @@
         }
     </style>
 
-
-
-    <script src="{{ asset('assets/js/travel.js') }}"></script>
+    <script src="{{ asset('assets/js/visa.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>

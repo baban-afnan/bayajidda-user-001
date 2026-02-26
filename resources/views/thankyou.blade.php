@@ -181,7 +181,7 @@
             <div class="receipt-body">
                 <!-- Brand Header -->
                 <div class="receipt-brand">
-                    <h4>Baya Jidda</h4>
+                    <h4>Bayajidda Global Services</h4>
                     <p class="text-muted small mb-0">Official Transaction Receipt</p>
                 </div>
 

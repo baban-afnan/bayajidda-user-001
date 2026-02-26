@@ -149,6 +149,19 @@ class ServiceSeeder extends Seeder
                 ['name' => 'Hotel Reservation', 'code' => '710', 'price' => 1000],
             ]);
 
+            // Visa Services
+            ServiceManager::getServiceWithFields('VISA', [
+                ['name' => 'Standard Visa Application', 'code' => 'visa-standard', 'price' => 5000],
+                ['name' => 'Express Visa Application', 'code' => 'visa-express', 'price' => 10000],
+            ]);
+
+            // CAC Registration
+            ServiceManager::getServiceWithFields('CAC', [
+                ['name' => 'Business Name Registration', 'code' => 'cac-bn', 'price' => 15000],
+                ['name' => 'Private Limited Company (LTD)', 'code' => 'cac-ltd', 'price' => 35000],
+                ['name' => 'Incorporated Trustee (NGO)', 'code' => 'cac-it', 'price' => 120000],
+            ]);
+
         
     }
 }

@@ -6,6 +6,7 @@ use App\Helpers\RequestIdHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use App\Models\Wallet;
+use App\Models\SmeData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -125,6 +126,9 @@ class DataController extends Controller
                 ->limit(6)
                 ->get();
 
+            // Fetch distinct SME networks
+            $smeNetworks = SmeData::select('network')->distinct()->get();
+
             $priceList1 = DB::table('data_variations')->where('service_id', 'mtn-data')->paginate(10, ['*'], 'table1_page');
             $priceList2 = DB::table('data_variations')->where('service_id', 'airtel-data')->paginate(10, ['*'], 'table2_page');
             $priceList3 = DB::table('data_variations')->where('service_id', 'glo-data')->paginate(10, ['*'], 'table3_page');
@@ -136,6 +140,7 @@ class DataController extends Controller
                 'user',
                 'wallet',
                 'servicename',
+                'smeNetworks',
                 'priceList1',
                 'priceList2',
                 'priceList3',

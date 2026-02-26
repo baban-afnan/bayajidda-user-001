@@ -232,6 +232,13 @@
 </div>
 
 <script>
+// Update amount when type is selected
+document.getElementById('type').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const amount = selectedOption.getAttribute('data-amount');
+    document.getElementById('amountToPay').value = amount ? amount : '';
+});
+
 document.getElementById('confirmPinBtn').addEventListener('click', function() {
     const confirmBtn = this;
     const loader = document.getElementById('pinLoader');

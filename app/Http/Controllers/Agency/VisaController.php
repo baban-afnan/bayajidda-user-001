@@ -13,21 +13,21 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 
-class TravelController extends Controller
+class VisaController extends Controller
 {
     public function index(Request $request)
     {
         $user = auth()->user();
 
-        // Fetch Travel Service
-        $travelService = Service::with(['fields' => function ($query) {
+        // Fetch Visa Service
+        $visaService = Service::with(['fields' => function ($query) {
             $query->where('is_active', 1);
         }])
-            ->where('name', 'TRAVEL')
+            ->where('name', 'VISA')
             ->first();
 
         $query = AgentService::where('user_id', $user->id)
-            ->where('service_type', 'travel');
+            ->where('service_type', 'visa');
 
         // Apply optional filters
         if ($request->filled('search')) {
@@ -53,13 +53,11 @@ class TravelController extends Controller
             ['balance' => 0.00, 'status' => 'active']
         );
 
-        // Prices for the user based on role
         $role = $user->role ?? 'user';
         
-        // Return view with data
-        return view('travel.index', compact(
+        return view('visa.index', compact(
             'submissions',
-            'travelService',
+            'visaService',
             'wallet',
             'role'
         ));
@@ -70,19 +68,15 @@ class TravelController extends Controller
         $user = auth()->user();
 
         $validated = $request->validate([
-            'service_field'   => 'required|exists:service_fields,id',
-            'from_country'    => 'required|string|max:255',
-            'to_country'      => 'required|string|max:255',
-            'email'           => 'required|email|max:255',
-            'phone_number'    => 'required|string|max:20',
-
-            'applicant_class' => 'required|in:Adult,Child,Infant',
-            'gender'          => 'required|in:Male,Female',
-            'departure_date'  => 'required|date|after_or_equal:today',
-            'return_date'     => 'nullable|required_if:trip_type,round_trip|date|after_or_equal:departure_date',
-            'trip_type'       => 'required|in:one_way,round_trip',
-            'passport_file'   => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120', // 5MB limit
-            'description'     => 'required|string|max:1000',
+            'service_field'    => 'required|exists:service_fields,id',
+            'country_apply'   => 'required|string|max:255',
+            'applicant_class'  => 'required|in:Adult,Child,Infant',
+            'gender'           => 'required|in:Male,Female',
+            'email'            => 'required|email|max:255',
+            'phone_number'     => 'required|string|max:20',
+            'passport_file'    => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'photo_file'       => 'required|file|mimes:jpg,jpeg,png|max:2048',
+            'description'      => 'nullable|string|max:1000',
         ]);
 
         $wallet = Wallet::where('user_id', $user->id)->firstOrFail();
@@ -96,59 +90,62 @@ class TravelController extends Controller
 
         $serviceField = ServiceField::findOrFail($validated['service_field']);
         $service = $serviceField->service;
-
         $role = $user->role ?? 'user';
 
-        // Calculate price based on role
         $totalAmount = $serviceField->prices()
             ->where('user_type', $role)
             ->value('price') ?? $serviceField->base_price;
 
         if ($wallet->balance < $totalAmount) {
             $msg = "Insufficient wallet balance. Required: NGN " . number_format($totalAmount, 2);
-            return redirect()->route('travel.index')->withErrors(['wallet' => $msg])->withInput();
+            return redirect()->route('visa.index')->withErrors(['wallet' => $msg])->withInput();
         }
 
         DB::beginTransaction();
 
         try {
-            // Handle passport upload
+            // Handle International Passport upload
             $passportUrl = null;
             if ($request->hasFile('passport_file')) {
                 $file = $request->file('passport_file');
-                $fileName = 'passport_' . Str::slug($user->email) . '_' . time() . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('uploads/passports', $fileName, 'public');
+                $fileName = 'visa_passport_' . Str::slug($user->email) . '_' . time() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('uploads/visas/passports', $fileName, 'public');
                 $passportUrl = asset('storage/' . $path);
+            }
+
+            // Handle Passport Photo upload
+            $photoUrl = null;
+            if ($request->hasFile('photo_file')) {
+                $file = $request->file('photo_file');
+                $fileName = 'visa_photo_' . Str::slug($user->email) . '_' . time() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('uploads/visas/photos', $fileName, 'public');
+                $photoUrl = asset('storage/' . $path);
             }
 
             // Debit wallet
             $wallet->decrement('balance', $totalAmount);
 
-            $transactionRef = 'TRV' . date('ymdHis') . strtoupper(Str::random(4));
+            $transactionRef = 'VSA' . date('ymdHis') . strtoupper(Str::random(4));
             $performedBy = trim("{$user->first_name} {$user->last_name}");
 
             $transaction = Transaction::create([
                 'transaction_ref' => $transactionRef,
                 'user_id' => $user->id,
                 'amount' => $totalAmount,
-                'description' => "Travel application: {$serviceField->field_name} ({$validated['from_country']} to {$validated['to_country']})",
+                'description' => "Visa application: {$serviceField->field_name} (Applying to {$validated['country_apply']})",
                 'type' => 'debit',
                 'status' => 'completed',
                 'performed_by' => $performedBy,
                 'metadata' => [
                     'service' => $service->name,
                     'service_field' => $serviceField->field_name,
-                    'from_country' => $validated['from_country'],
-                    'to_country' => $validated['to_country'],
+                    'country_apply' => $validated['country_apply'],
                     'email' => $validated['email'],
                     'phone_number' => $validated['phone_number'],
-                    'departure_date' => $validated['departure_date'],
-                    'return_date' => $validated['return_date'],
-                    'trip_type' => $validated['trip_type'],
-
                     'applicant_class' => $validated['applicant_class'],
                     'gender' => $validated['gender'],
                     'passport_url' => $passportUrl,
+                    'photo_url' => $photoUrl,
                 ],
             ]);
 
@@ -163,61 +160,32 @@ class TravelController extends Controller
                 'service_field_name' => $serviceField->field_name,
                 'email' => $validated['email'],
                 'phone_number' => $validated['phone_number'],
-                'country' => $validated['from_country'],
-                'from_country' => $validated['from_country'],
-                'to_country' => $validated['to_country'],
-                'departure_date' => $validated['departure_date'],
-                'return_date' => $validated['return_date'],
-                'trip_type' => $validated['trip_type'],
-
+                'country' => $validated['country_apply'],
                 'applicant_class' => $validated['applicant_class'],
                 'gender' => $validated['gender'],
                 'passport_url' => $passportUrl,
-                'description' => $validated['description'],
+                'file_url' => $photoUrl, // Using file_url for the second upload
+                'description' => $validated['description'] ?? "Visa application for {$validated['country_apply']}",
                 'amount' => $totalAmount,
                 'transaction_id' => $transaction->id,
                 'submission_date' => now(),
                 'status' => 'pending',
-                'service_type' => 'travel',
+                'service_type' => 'visa',
                 'performed_by' => $performedBy,
             ]);
 
-
-
-
             DB::commit();
 
-            return redirect()->route('travel.index')->with([
+            return redirect()->route('visa.index')->with([
                 'status' => 'success',
-                'message' => "Travel application submitted successfully. Charged: NGN " . number_format($totalAmount, 2),
+                'message' => "Visa application submitted successfully. Charged: NGN " . number_format($totalAmount, 2),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Travel Application Error: ' . $e->getMessage());
-            return redirect()->route('travel.index')->withErrors([
+            Log::error('Visa Application Error: ' . $e->getMessage());
+            return redirect()->route('visa.index')->withErrors([
                 'error' => 'Something went wrong: ' . $e->getMessage(),
             ])->withInput();
         }
-    }
-
-    public function getServiceFields($serviceId)
-    {
-        $role = auth()->user()->role ?? 'user';
-
-        $fields = ServiceField::where('service_id', $serviceId)
-            ->where('is_active', 1)
-            ->get();
-
-        $mappedFields = $fields->map(function ($field) use ($role) {
-            $price = $field->prices()->where('user_type', $role)->value('price') ?? $field->base_price;
-            return [
-                'id' => $field->id,
-                'field_name' => $field->field_name,
-                'description' => $field->description,
-                'price' => $price,
-            ];
-        });
-
-        return response()->json($mappedFields);
     }
 }

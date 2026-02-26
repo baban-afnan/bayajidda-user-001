@@ -32,6 +32,12 @@
                     </a>
                 </li>
 
+                  <li>
+                     <a href="{{ route('p2p.index') }}" class="{{ request()->routeIs('p2p.index') ? 'active' : '' }}">
+                        <i class="ti ti-arrows-exchange"></i><span>Transfer P2P</span>
+                    </a>
+                </li>
+
                 <!-- Utility Bill Payment -->
                 <li class="submenu">
                     <a href="javascript:void(0);">
@@ -50,7 +56,7 @@
                 <!-- BVN Services -->
                 <li class="submenu">
                     <a href="javascript:void(0);">
-                        <i class="ti ti-users-group"></i>
+                        <i class="ti ti-id"></i>
                         <span>BVN Services</span>
                         <span class="menu-arrow"></span>
                     </a>
@@ -64,7 +70,7 @@
                 <!-- NIN Services -->
                 <li class="submenu">
                     <a href="javascript:void(0);">
-                        <i class="ti ti-user-check"></i>
+                        <i class="ti ti-id-badge"></i>
                         <span>NIN Services</span>
                         <span class="menu-arrow"></span>
                     </a>
@@ -99,11 +105,24 @@
                         <span class="menu-arrow"></span>
                       </a>
                     <ul>
-                        <li><a href="{{ route('travel.index') }}" class="{{ request()->routeIs('travel.index') ? 'active' : '' }}">Travel</a></li>
+                        <li><a href="{{ route('travel.index') }}" class="{{ request()->routeIs('travel.index') ? 'active' : '' }}">Flight Ticket</a></li>
                         <li><a href="{{ route('hotel.index') }}" class="{{ request()->routeIs('hotel.index') ? 'active' : '' }}">Hotel</a></li>
+                        <li><a href="{{ route('visa.index') }}" class="{{ request()->routeIs('visa.index') ? 'active' : '' }}">Visa Form</a></li>
                     </ul>
-
                 </li>
+
+                  <li>
+                     <a href="{{ route('cac.index') }}" class="{{ request()->routeIs('cac.index') ? 'active' : '' }}">
+                        <i class="ti ti-building"></i><span>CAC Registration</span>
+                    </a>
+                </li>
+
+                 <li>
+                     <a href="{{ route('tin.index') }}" class="{{ request()->routeIs('tin.index') ? 'active' : '' }}">
+                        <i class="ti ti-file-certificate"></i><span>Tin Registration</span>
+                    </a>
+                </li>
+
 
                   <!-- Esims and other services -->
                 <li class="submenu">

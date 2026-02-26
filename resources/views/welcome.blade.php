@@ -276,21 +276,21 @@
                             <div class="contact-icon"><i class="fas fa-location-dot"></i></div>
                             <div class="contact-info">
                                 <span style="display: block; font-weight: 600; color: #fff; margin-bottom: 5px;">Head Office</span>
-                                <span style="color: #94a3b8; font-size: 0.95rem;">Tudun Wada Street, Gwammaja, Kano</span>
+                                <span style="color: #94a3b8; font-size: 0.95rem;">Head office: No.1 Hameda plaza Mamman Daura Street Opp Tashar Kudu Daura Katsina State </span>
                             </div>
                         </div>
                         <div class="footer-contact-item">
                             <div class="contact-icon"><i class="fas fa-phone-volume"></i></div>
                             <div class="contact-info">
                                 <span style="display: block; font-weight: 600; color: #fff; margin-bottom: 5px;">Call Support</span>
-                                <span style="color: #94a3b8; font-size: 0.95rem;">+234 911 234 5678</span>
+                                <span style="color: #94a3b8; font-size: 0.95rem;">+2348104713436</span>
                             </div>
                         </div>
                         <div class="footer-contact-item">
                             <div class="contact-icon"><i class="fas fa-envelope-open-text"></i></div>
                             <div class="contact-info">
                                 <span style="display: block; font-weight: 600; color: #fff; margin-bottom: 5px;">Email Us</span>
-                                <span style="color: #94a3b8; font-size: 0.95rem;">safanane@gmail.com</span>
+                                <span style="color: #94a3b8; font-size: 0.95rem;">bayajiddagloble1414@gmail.com</span>
                             </div>
                         </div>
                     </div>

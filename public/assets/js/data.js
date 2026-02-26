@@ -1,4 +1,5 @@
 $(document).ready(function () {
+/*
     // When network is selected, fetch available bundles
     $("#service_id").change(function () {
         const serviceId = $(this).val();
@@ -73,6 +74,7 @@ $(document).ready(function () {
             }
         });
     });
+*/
 
     // Phone number validation
     window.validateNumber = function () {

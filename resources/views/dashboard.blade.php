@@ -15,43 +15,55 @@
 
     <div class="mt-4">
         <!-- User + Wallet Section -->
-        <div class="card border-0 shadow-sm rounded-4 mb-3">
-            <div class="card-body user-wallet-wrap">
+        <div class="card border-0 shadow rounded-4 mb-3 overflow-hidden user-wallet-card">
+            <div class="user-wallet-gradient px-4 py-4">
                 <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <!-- User Image -->
-                    <div class="avatar flex-shrink-0">
-                        <img src="{{ Auth::user()->photo ?? asset('assets/img/profiles/avatar-31.jpg') }}"
-                             class="rounded-circle border border-3 border-primary shadow-sm user-avatar"
-                             alt="User Avatar">
+
+                    <!-- User Avatar -->
+                    <div class="flex-shrink-0">
+                        <div class="user-avatar-ring">
+                            <img src="{{ Auth::user()->photo ?? asset('assets/img/profiles/avatar-31.jpg') }}"
+                                 class="user-avatar-img"
+                                 alt="User Avatar">
+                        </div>
                     </div>
 
-                    <!-- Welcome Message -->
+                    <!-- Welcome + Account Info -->
                     <div class="me-auto">
-                        <h4 class="fw-semibold text-dark mb-1 welcome-text">
+                        <h5 class="fw-bold text-white mb-1">
                             Welcome back, {{ Auth::user()->first_name . ' ' . Auth::user()->surname ?? 'User' }} 👋
-                        </h4>
-                        <small class="text-danger">Account ID: {{ $virtualAccount->accountNo ?? 'N/A' }} {{ $virtualAccount->bankName ?? 'N/A' }}</small>
-                    </div>
-
-                    <!-- Wallet Info -->
-                    <div class="d-flex align-items-center gap-2 ms-2">
-                        <span class="fw-medium text-muted small mb-0">Balance:</span>
-                        <h5 id="wallet-balance" class="mb-0 text-success fw-bold balance-text">
-                            ₦{{ number_format($wallet->balance ?? 0, 2) }}
                         </h5>
-
-                        <!-- Toggle Balance Button -->
-                        <button id="toggle-balance" class="btn btn-sm btn-outline-secondary ms-1 p-1 toggle-btn"
-                                aria-pressed="true" title="Toggle balance visibility">
-                            <i class="fas fa-eye eye-icon" aria-hidden="true"></i>
-                        </button>
-
-                        <!-- Wallet Icon -->
-                        <a href="{{ route('wallet') }}" class="btn btn-light ms-1 border-0 p-0 wallet-btn"
-                           title="View Wallet Details" aria-label="View wallet">
-                            <i class="fas fa-wallet wallet-icon text-primary"></i>
-                        </a>
+                        <span class="account-badge">
+                            <i class="fas fa-university me-1"></i>
+                            {{ $virtualAccount->accountNo ?? 'N/A' }} &bull; {{ $virtualAccount->bankName ?? 'N/A' }}
+                        </span>
                     </div>
+
+                    <!-- Balance Card -->
+                    <div class="balance-pill d-flex align-items-center gap-2">
+                        <div>
+                            <p class="balance-label mb-0">Available Balance</p>
+                            <h5 id="wallet-balance" class="balance-amount mb-0">
+                                ₦{{ number_format($wallet->balance ?? 0, 2) }}
+                            </h5>
+                        </div>
+                        <div class="d-flex flex-column gap-1 ms-2">
+                            <!-- Toggle Balance -->
+                            <button id="toggle-balance"
+                                    class="btn btn-sm balance-toggle-btn"
+                                    aria-pressed="true"
+                                    title="Toggle balance visibility">
+                                <i class="fas fa-eye eye-icon" aria-hidden="true"></i>
+                            </button>
+                            <!-- Wallet Link -->
+                            <a href="{{ route('wallet') }}"
+                               class="btn btn-sm balance-toggle-btn"
+                               title="View Wallet" aria-label="View wallet">
+                                <i class="fas fa-wallet"></i>
+                            </a>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -151,6 +163,16 @@
                             </a>
                         </div>
 
+                        <!-- Fund transfer -->
+                        <div class="col">
+                            <a href="{{ route('p2p.index') }}" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-arrows-exchange fs-24 text-primary"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">Transfer P2P</span>
+                            </a>
+                        </div>
+
                         <!-- Airtime -->
                         <div class="col">
                             <a href="{{ route('airtime') }}" class="text-decoration-none service-item">
@@ -165,7 +187,7 @@
                         <div class="col">
                             <a href="{{ route('buy-data') }}" class="text-decoration-none service-item">
                                 <div class="service-icon-wrap mb-2 mx-auto">
-                                    <i class="ti ti-world fs-24 text-warning"></i>
+                                    <i class="ti ti-wifi fs-24 text-warning"></i>
                                 </div>
                                 <span class="fs-13 fw-medium text-dark d-block">Data</span>
                             </a>
@@ -175,7 +197,7 @@
                         <div class="col">
                             <a href="{{ route('buy-sme-data') }}" class="text-decoration-none service-item">
                                 <div class="service-icon-wrap mb-2 mx-auto">
-                                    <i class="ti ti-device-gamepad fs-24 text-success"></i>
+                                    <i class="ti ti-database fs-24 text-success"></i>
                                 </div>
                                 <span class="fs-13 fw-medium text-dark d-block">SME Data</span>
                             </a>
@@ -205,7 +227,7 @@
                         <div class="col">
                             <a href="#" data-bs-toggle="modal" data-bs-target="#bvnServicesModal" class="text-decoration-none service-item">
                                 <div class="service-icon-wrap mb-2 mx-auto">
-                                    <img src="https://img.icons8.com/color/48/bank-card-back-side.png" class="service-img-icon" alt="BVN">
+                                    <i class="ti ti-id fs-24 text-primary"></i>
                                 </div>
                                 <span class="fs-13 fw-medium text-dark d-block">BVN Services</span>
                             </a>
@@ -215,7 +237,7 @@
                         <div class="col">
                             <a href="#" data-bs-toggle="modal" data-bs-target="#ninServicesModal" class="text-decoration-none service-item">
                                 <div class="service-icon-wrap mb-2 mx-auto">
-                                    <img src="https://img.icons8.com/color/48/identification-documents.png" class="service-img-icon" alt="NIN">
+                                    <i class="ti ti-id-badge fs-24 text-info"></i>
                                 </div>
                                 <span class="fs-13 fw-medium text-dark d-block">NIN Services</span>
                             </a>
@@ -225,7 +247,7 @@
                         <div class="col">
                             <a href="#" data-bs-toggle="modal" data-bs-target="#verifyModal" class="text-decoration-none service-item">
                                 <div class="service-icon-wrap mb-2 mx-auto">
-                                    <i class="ti ti-id-badge fs-24 text-secondary"></i>
+                                    <i class="ti ti-fingerprint fs-24 text-secondary"></i>
                                 </div>
                                 <span class="fs-13 fw-medium text-dark d-block">Verify</span>
                             </a>
@@ -235,7 +257,7 @@
                         <div class="col">
                             <a href="{{ route('hotel.index') }}" class="text-decoration-none service-item">
                                 <div class="service-icon-wrap mb-2 mx-auto">
-                                    <i class="ti ti-home-plus fs-24 text-success"></i>
+                                    <i class="ti ti-building-skyscraper fs-24 text-success"></i>
                                 </div>
                                 <span class="fs-13 fw-medium text-dark d-block">Hotel</span>
                             </a>
@@ -247,7 +269,59 @@
                                 <div class="service-icon-wrap mb-2 mx-auto">
                                     <i class="ti ti-plane fs-24 text-success"></i>
                                 </div>
-                                <span class="fs-13 fw-medium text-dark d-block">Travel</span>
+                                <span class="fs-13 fw-medium text-dark d-block">Flight Ticket</span>
+                            </a>
+                        </div>
+
+                           <!-- visa -->
+                        <div class="col">
+                            <a href="{{ route('visa.index') }}" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-home-plus fs-24 text-success"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">Visa Ticket</span>
+                            </a>
+                        </div>
+
+
+                            <!-- cac registration -->
+                        <div class="col">
+                            <a href="{{ route('cac.index') }}" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-building fs-24 text-primary"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">CAC Reg</span>
+                            </a>
+                        </div>
+
+                         <!-- tin registration -->
+                        <div class="col">
+                            <a href="{{ route('tin.index') }}" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-file-certificate fs-24 text-success"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">Tin Reg</span>
+                            </a>
+                        </div>
+
+
+                           <!-- network smile -->
+                        <div class="col">
+                            <a href="#" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-file-certificate fs-24 text-warning"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">Kirani</span>
+                            </a>
+                        </div>
+
+                           <!-- Kirani esin-->
+                        <div class="col">
+                            <a href="#" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-file-certificate fs-24 text-info"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">Alfa</span>
                             </a>
                         </div>
 

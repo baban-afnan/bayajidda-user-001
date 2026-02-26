@@ -32,6 +32,7 @@ use App\Http\Controllers\Agency\NinModificationController;
 use App\Http\Controllers\Agency\IpeController;
 use App\Http\Controllers\Agency\TravelController;
 use App\Http\Controllers\Agency\HotelController;
+use App\Http\Controllers\Agency\VisaController;
 
 
 /*
@@ -74,6 +75,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [WalletController::class, 'index'])->name('wallet');
         Route::post('/create-virtual-account', [WalletController::class, 'createWallet'])->name('virtual.account.create');
         Route::post('/claim-bonus', [WalletController::class, 'claimBonus'])->name('wallet.claimBonus');
+
+         // P2P Transfer Routes
+        Route::get('/p2p', [\App\Http\Controllers\P2P\P2PController::class, 'index'])->name('p2p.index');
+        Route::post('/p2p-transfer', [\App\Http\Controllers\P2P\P2PController::class, 'transfer'])->name('p2p.transfer');
+        Route::get('/p2p-verify', [\App\Http\Controllers\P2P\P2PController::class, 'verifyRecipient'])->name('p2p.verify');
     });
 
     // Support
@@ -215,9 +221,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // BVN Services & CRM
     Route::get('/bvn-crm', [BvnServicesController::class, 'index'])->name('bvn-crm');
     Route::post('/bvn-crm', [BvnServicesController::class, 'store'])->name('crm.store');
-
-    Route::get('/send-vnin', [BvnServicesController::class, 'index'])->name('send-vnin');
-    Route::post('/send-vnin', [BvnServicesController::class, 'store'])->name('send-vnin.store');
+    Route::get('/bvn-crm/check/{id}', [BvnServicesController::class, 'checkStatus'])->name('crm.check');
 
     Route::get('/modification-fields/{serviceId}', [BvnModificationController::class, 'getServiceFields'])->name('modification.fields');
     Route::get('/modification', [BvnModificationController::class, 'index'])->name('modification');
@@ -242,6 +246,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('hotel')->group(function () {
         Route::get('/', [HotelController::class, 'index'])->name('hotel.index');
         Route::post('/', [HotelController::class, 'store'])->name('hotel.store');
+    });
+
+    // CAC Registration
+    Route::prefix('cac-reg')->group(function () {
+        Route::get('/', [App\Http\Controllers\Agency\CacRegistrationController::class, 'index'])->name('cac.index');
+        Route::post('/', [App\Http\Controllers\Agency\CacRegistrationController::class, 'store'])->name('cac.store');
+    });
+
+    // Visa Services
+    Route::prefix('visa')->group(function () {
+        Route::get('/', [VisaController::class, 'index'])->name('visa.index');
+        Route::post('/', [VisaController::class, 'store'])->name('visa.store');
     });
 });
 

@@ -1,5 +1,5 @@
 <x-app-layout>
-    <title>Baya Jidda - {{ $title ?? 'Buy Data' }}</title>
+    <title>Digital Verify - {{ $title ?? 'Buy Data' }}</title>
 
     <div class="row">
         <div class="col-xxl-12 col-xl-12">
@@ -165,6 +165,84 @@
 </div>
 
 <script>
+// Fetch bundles when network is selected
+document.getElementById('service_id').addEventListener('change', function() {
+    const networkId = this.value;
+    const bundleSelect = document.getElementById('bundle');
+    const amountInput = document.getElementById('amountToPay');
+
+    console.log("Network selected:", networkId);
+    bundleSelect.innerHTML = '<option value="">Loading...</option>';
+    amountInput.value = '';
+
+    if (!networkId) {
+        bundleSelect.innerHTML = '<option value="">Choose Bundle</option>';
+        return;
+    }
+
+    // Using relative path to avoid protocol/domain mismatch issues
+    const url = "/data/fetch-bundles?id=" + networkId;
+    console.log("Fetching bundles from:", url);
+
+    fetch(url)
+        .then(response => {
+            console.log("Fetch response status:", response.status);
+            if (!response.ok) {
+                throw new Error("HTTP error! status: " + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Bundles received:", data.length);
+            bundleSelect.innerHTML = '<option value="">Choose Bundle</option>';
+            if (!data || data.length === 0) {
+                bundleSelect.innerHTML = '<option value="">No bundles found</option>';
+                return;
+            }
+            data.forEach(bundle => {
+                const option = document.createElement('option');
+                option.value = bundle.variation_code;
+                option.textContent = bundle.name;
+                bundleSelect.appendChild(option);
+            });
+        })
+        .catch(err => {
+            console.error("Error fetching bundles:", err);
+            bundleSelect.innerHTML = '<option value="">Error loading bundles</option>';
+        });
+});
+
+// Update price when bundle is selected
+document.getElementById('bundle').addEventListener('change', function() {
+    const bundleCode = this.value;
+    const amountInput = document.getElementById('amountToPay');
+
+    console.log("Bundle selected:", bundleCode);
+    if (!bundleCode) {
+        amountInput.value = '';
+        return;
+    }
+
+    const url = "/data/fetch-price?id=" + bundleCode;
+    console.log("Fetching price from:", url);
+
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("HTTP error! status: " + response.status);
+            }
+            return response.json();
+        })
+        .then(price => {
+            console.log("Price received:", price);
+            amountInput.value = price;
+        })
+        .catch(err => {
+            console.error("Error fetching price:", err);
+            amountInput.value = '0.00';
+        });
+});
+
 document.getElementById('confirmPinBtn').addEventListener('click', function() {
     const confirmBtn = this;
     const loader = document.getElementById('pinLoader');

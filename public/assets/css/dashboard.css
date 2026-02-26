@@ -1,3 +1,133 @@
+/* =============================================
+   User + Wallet Card
+   ============================================= */
+.user-wallet-card {
+    border: none;
+}
+
+.user-wallet-gradient {
+    background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.user-wallet-gradient::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.user-wallet-gradient::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    left: -30px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Avatar Ring */
+.user-avatar-ring {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.4) 100%);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.user-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Account Badge */
+.account-badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+/* Balance Pill */
+.balance-pill {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+    padding: 10px 16px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    position: relative;
+    z-index: 1;
+}
+
+.balance-label {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.balance-amount {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+}
+
+/* Toggle / Wallet Buttons */
+.balance-toggle-btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    font-size: 0.8rem;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.balance-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.35);
+    color: #fff;
+    transform: scale(1.1);
+}
+
+@media (max-width: 576px) {
+    .balance-pill {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .user-wallet-gradient {
+        padding: 1.25rem !important;
+    }
+    .balance-amount {
+        font-size: 1.1rem;
+    }
+}
+
 /* Dashboard Notification Styles */
 .notification-container {
     overflow: hidden;

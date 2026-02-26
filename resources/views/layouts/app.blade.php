@@ -124,12 +124,20 @@
         document.addEventListener("DOMContentLoaded", function () {
             setTimeout(() => {
                 document.querySelectorAll('.alert.alert-dismissible').forEach(alert => {
+                    // Check if element still exists in DOM and has not been closed
                     if (alert && document.body.contains(alert)) {
-                        if (typeof bootstrap !== 'undefined' && bootstrap.Alert) {
-                            const alertInstance = bootstrap.Alert.getOrCreateInstance(alert);
-                            if (alertInstance) {
-                                alertInstance.close();
+                        try {
+                            if (typeof bootstrap !== 'undefined' && bootstrap.Alert) {
+                                let alertInstance = bootstrap.Alert.getInstance(alert);
+                                if (!alertInstance) {
+                                    alertInstance = new bootstrap.Alert(alert);
+                                }
+                                if (alertInstance && alert.parentNode) {
+                                    alertInstance.close();
+                                }
                             }
+                        } catch (e) {
+                            console.warn('Could not auto-dismiss alert:', e);
                         }
                     }
                 });
