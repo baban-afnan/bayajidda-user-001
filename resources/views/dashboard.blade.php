@@ -16,20 +16,10 @@
     <div class="mt-4">
         <!-- User + Wallet Section -->
         <div class="card border-0 shadow rounded-4 mb-4 overflow-hidden user-wallet-card">
-            <div class="user-wallet-gradient p-4 p-md-5">
+            <div class="bg-primary text-white p-4 p-md-5">
                 <div class="row align-items-center gy-4">
                     <!-- User Info -->
                     <div class="col-12 col-md-7 col-xl-8 d-flex flex-column flex-sm-row align-items-sm-center gap-3 text-center text-sm-start">
-                        <!-- User Avatar -->
-                        <div class="flex-shrink-0 mx-auto mx-sm-0 position-relative">
-                            <div style="width: 76px; height: 76px; padding: 4px; background: rgba(255,255,255,0.3);" class="rounded-circle shadow-sm">
-                                <img src="{{ Auth::user()->photo ?? asset('assets/img/profiles/avatar-31.jpg') }}"
-                                     class="rounded-circle bg-white"
-                                     style="width: 100%; height: 100%; object-fit: cover;"
-                                     alt="User Avatar">
-                            </div>
-                        </div>
-
                         <!-- Welcome & Account -->
                         <div class="mt-2 mt-sm-0">
                             <h4 class="fw-bold text-white mb-2" style="letter-spacing: -0.5px;">
@@ -48,7 +38,7 @@
                     <div class="col-12 col-md-5 col-xl-4">
                         <div class="bg-white bg-opacity-25 border border-white border-opacity-25 rounded-4 p-3 d-flex align-items-center justify-content-between shadow-sm position-relative overflow-hidden" style="backdrop-filter: blur(8px);">
                             <div class="position-relative z-1">
-                                <p class="text-white text-opacity-75 mb-1 fs-13 fw-semibold text-uppercase tracking-wide">Available Balance</p>
+                                <p class="text-white text-opacity-75 mb-1 fs-13 fw-semibold text-uppercase tracking-wide">Balance:</p>
                                 <h3 id="wallet-balance" class="fw-bold text-white mb-0">
                                     ₦{{ number_format($wallet->balance ?? 0, 2) }}
                                 </h3>
