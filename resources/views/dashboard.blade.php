@@ -15,56 +15,54 @@
 
     <div class="mt-4">
         <!-- User + Wallet Section -->
-        <div class="card border-0 shadow rounded-4 mb-3 overflow-hidden user-wallet-card">
-            <div class="user-wallet-gradient px-4 py-4">
-                <div class="d-flex align-items-center gap-3 flex-wrap">
-
-                    <!-- User Avatar -->
-                    <div class="flex-shrink-0">
-                        <div class="user-avatar-ring">
-                            <img src="{{ Auth::user()->photo ?? asset('assets/img/profiles/avatar-31.jpg') }}"
-                                 class="user-avatar-img"
-                                 style="width: 60px; height: 60px; object-fit: cover;"
-                                 alt="User Avatar">
+        <div class="card border-0 shadow rounded-4 mb-4 overflow-hidden user-wallet-card">
+            <div class="user-wallet-gradient p-4 p-md-5">
+                <div class="row align-items-center gy-4">
+                    <!-- User Info -->
+                    <div class="col-12 col-md-7 col-xl-8 d-flex flex-column flex-sm-row align-items-sm-center gap-3 text-center text-sm-start">
+                        <!-- User Avatar -->
+                        <div class="flex-shrink-0 mx-auto mx-sm-0 position-relative">
+                            <div style="width: 76px; height: 76px; padding: 4px; background: rgba(255,255,255,0.3);" class="rounded-circle shadow-sm">
+                                <img src="{{ Auth::user()->photo ?? asset('assets/img/profiles/avatar-31.jpg') }}"
+                                     class="rounded-circle bg-white"
+                                     style="width: 100%; height: 100%; object-fit: cover;"
+                                     alt="User Avatar">
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Welcome + Account Info -->
-                    <div class="me-auto">
-                        <h5 class="fw-bold text-white mb-1">
-                            Welcome back, {{ Auth::user()->first_name . ' ' . Auth::user()->surname ?? 'User' }} 👋
-                        </h5>
-                        <span class="account-badge">
-                            <i class="fas fa-university me-1"></i>
-                            {{ $virtualAccount->accountNo ?? 'N/A' }} &bull; {{ $virtualAccount->bankName ?? 'N/A' }}
-                        </span>
+                        <!-- Welcome & Account -->
+                        <div class="mt-2 mt-sm-0">
+                            <h4 class="fw-bold text-white mb-2" style="letter-spacing: -0.5px;">
+                                Welcome back, {{ Auth::user()->first_name . ' ' . Auth::user()->surname ?? 'User' }} 👋
+                            </h4>
+                            <div class="d-inline-flex align-items-center bg-white bg-opacity-25 rounded-pill px-3 py-1 border border-white border-opacity-25 shadow-sm">
+                                <i class="fas fa-university me-2 text-white"></i>
+                                <span class="fw-medium text-white fs-14">
+                                    {{ $virtualAccount->accountNo ?? 'N/A' }} <span class="mx-1">&bull;</span> {{ $virtualAccount->bankName ?? 'N/A' }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Balance Card -->
-                    <div class="balance-pill d-flex align-items-center gap-2">
-                        <div>
-                            <p class="balance-label mb-0">Available Balance</p>
-                            <h5 id="wallet-balance" class="balance-amount mb-0">
-                                ₦{{ number_format($wallet->balance ?? 0, 2) }}
-                            </h5>
-                        </div>
-                        <div class="d-flex flex-column gap-1 ms-2">
-                            <!-- Toggle Balance -->
-                            <button id="toggle-balance"
-                                    class="btn btn-sm balance-toggle-btn"
-                                    aria-pressed="true"
-                                    title="Toggle balance visibility">
-                                <i class="fas fa-eye eye-icon" aria-hidden="true"></i>
-                            </button>
-                            <!-- Wallet Link -->
-                            <a href="{{ route('wallet') }}"
-                               class="btn btn-sm balance-toggle-btn"
-                               title="View Wallet" aria-label="View wallet">
-                                <i class="fas fa-wallet"></i>
-                            </a>
+                    <div class="col-12 col-md-5 col-xl-4">
+                        <div class="bg-white bg-opacity-25 border border-white border-opacity-25 rounded-4 p-3 d-flex align-items-center justify-content-between shadow-sm position-relative overflow-hidden" style="backdrop-filter: blur(8px);">
+                            <div class="position-relative z-1">
+                                <p class="text-white text-opacity-75 mb-1 fs-13 fw-semibold text-uppercase tracking-wide">Available Balance</p>
+                                <h3 id="wallet-balance" class="fw-bold text-white mb-0">
+                                    ₦{{ number_format($wallet->balance ?? 0, 2) }}
+                                </h3>
+                            </div>
+                            <div class="d-flex flex-row flex-md-column gap-2 ms-2 position-relative z-1">
+                                <button id="toggle-balance" class="btn btn-light rounded-circle shadow-sm btn-sm d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; flex-shrink: 0;" aria-pressed="true" title="Toggle balance visibility">
+                                    <i class="fas fa-eye text-primary fs-10 eye-icon"></i>
+                                </button>
+                                <a href="{{ route('wallet') }}" class="btn btn-light rounded-circle shadow-sm btn-sm d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; flex-shrink: 0;" title="View Wallet">
+                                    <i class="fas fa-wallet text-primary fs-10"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
