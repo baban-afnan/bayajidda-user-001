@@ -24,6 +24,7 @@
                         <div class="user-avatar-ring">
                             <img src="{{ Auth::user()->photo ?? asset('assets/img/profiles/avatar-31.jpg') }}"
                                  class="user-avatar-img"
+                                 style="width: 30px; height: 30px; object-fit: cover;"
                                  alt="User Avatar">
                         </div>
                     </div>
@@ -279,7 +280,7 @@
                                 <div class="service-icon-wrap mb-2 mx-auto">
                                     <i class="ti ti-home-plus fs-24 text-success"></i>
                                 </div>
-                                <span class="fs-13 fw-medium text-dark d-block">Visa Ticket</span>
+                                <span class="fs-13 fw-medium text-dark d-block">Apply Visa</span>
                             </a>
                         </div>
 
