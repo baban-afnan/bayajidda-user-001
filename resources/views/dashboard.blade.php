@@ -24,7 +24,7 @@
                         <div class="user-avatar-ring">
                             <img src="{{ Auth::user()->photo ?? asset('assets/img/profiles/avatar-31.jpg') }}"
                                  class="user-avatar-img"
-                                 style="width: 30px; height: 30px; object-fit: cover;"
+                                 style="width: 60px; height: 60px; object-fit: cover;"
                                  alt="User Avatar">
                         </div>
                     </div>
