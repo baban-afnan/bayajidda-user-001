@@ -36,20 +36,32 @@
 
                     <!-- Balance Card -->
                     <div class="col-12 col-md-5 col-xl-4">
-                        <div class="bg-white bg-opacity-25 border border-white border-opacity-25 rounded-4 p-3 d-flex align-items-center justify-content-between shadow-sm position-relative overflow-hidden" style="backdrop-filter: blur(8px);">
-                            <div class="position-relative z-1">
-                                <p class="text-white text-opacity-75 mb-1 fs-13 fw-semibold text-uppercase tracking-wide">Balance:</p>
-                                <h3 id="wallet-balance" class="fw-bold text-white mb-0">
-                                    ₦{{ number_format($wallet->balance ?? 0, 2) }}
-                                </h3>
+                        <div class="bg-white bg-opacity-25 border border-white border-opacity-25 rounded-4 p-3 d-flex flex-column shadow-sm position-relative overflow-hidden" style="backdrop-filter: blur(8px);">
+                            <div class="d-flex align-items-center justify-content-between position-relative z-1 mb-3">
+                                <div>
+                                    <p class="text-white text-opacity-75 mb-1 fs-13 fw-semibold text-uppercase tracking-wide">Balance:</p>
+                                    <h3 id="wallet-balance" class="fw-bold text-white mb-0">
+                                        ₦{{ number_format($wallet->balance ?? 0, 2) }}
+                                    </h3>
+                                </div>
+                                <div class="d-flex gap-2 ms-2">
+                                    <button id="toggle-balance" class="btn btn-light rounded-circle shadow-sm btn-sm d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; flex-shrink: 0;" aria-pressed="true" title="Toggle balance visibility">
+                                        <i class="fas fa-eye text-primary fs-10 eye-icon"></i>
+                                    </button>
+                                    <a href="{{ route('wallet') }}" class="btn btn-light rounded-circle shadow-sm btn-sm d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; flex-shrink: 0;" title="View Wallet">
+                                        <i class="fas fa-wallet text-primary fs-10"></i>
+                                    </a>
+                                </div>
                             </div>
-                            <div class="d-flex flex-row flex-md-column gap-2 ms-2 position-relative z-1">
-                                <button id="toggle-balance" class="btn btn-light rounded-circle shadow-sm btn-sm d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; flex-shrink: 0;" aria-pressed="true" title="Toggle balance visibility">
-                                    <i class="fas fa-eye text-primary fs-10 eye-icon"></i>
-                                </button>
-                                <a href="{{ route('wallet') }}" class="btn btn-light rounded-circle shadow-sm btn-sm d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; flex-shrink: 0;" title="View Wallet">
-                                    <i class="fas fa-wallet text-primary fs-10"></i>
-                                </a>
+                            
+                            <!-- Referral Bonus -->
+                            <div class="d-flex align-items-center justify-content-between border-top border-white border-opacity-25 pt-2 mt-1 position-relative z-1">
+                                <span class="text-white text-opacity-75 fs-12 fw-semibold text-uppercase tracking-wide">
+                                    <i class="fas fa-gift text-warning me-1"></i> Referral Bonus:
+                                </span>
+                                <span class="fw-bold text-white fs-14">
+                                    ₦{{ number_format(\App\Models\BonusHistory::where('user_id', Auth::id())->sum('amount') ?? 0, 2) }}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -289,7 +301,7 @@
                                 <div class="service-icon-wrap mb-2 mx-auto">
                                     <i class="ti ti-file-certificate fs-24 text-success"></i>
                                 </div>
-                                <span class="fs-13 fw-medium text-dark d-block">Tin Reg</span>
+                                <span class="fs-13 fw-medium text-dark d-block">TIN REG</span>
                             </a>
                         </div>
 

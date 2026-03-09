@@ -133,6 +133,66 @@
             </div>
         </div>
 
+        <!-- Referral Section -->
+        <div class="row g-4 mt-1 mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4 p-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #0a4a31 0%, #0d5c3e 100%); color: white;">
+                    <!-- Decorative Background Patterns -->
+                    <div class="position-absolute top-0 end-0 opacity-10" style="transform: translate(10%, -20%);">
+                        <i class="fas fa-bullhorn fa-10x" style="color: #ffd700;"></i>
+                    </div>
+                    
+                    <div class="row align-items-center position-relative z-1">
+                        <div class="col-lg-7 mb-4 mb-lg-0">
+                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill mb-3 fw-bold"><i class="fas fa-star text-danger me-1"></i> Bonus Program</span>
+                            <h3 class="fw-bold text-white mb-2">Invite Friends & Earn Rewards!</h3>
+                            <p class="text-white-50 mb-4" style="font-size: 1.1rem;">
+                                Share your unique referral code with friends and family. 
+                                When they join and make their first deposit, you both receive a special bonus directly in your wallets!
+                            </p>
+                            
+                            <div class="d-flex flex-wrap gap-3">
+                                <div class="d-flex align-items-center gap-2 bg-white bg-opacity-10 px-3 py-2 rounded-pill">
+                                    <i class="fas fa-infinity text-warning"></i>
+                                    <span class="small fw-semibold text-white">Unlimited Referrals</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2 bg-white bg-opacity-10 px-3 py-2 rounded-pill">
+                                    <i class="fas fa-bolt text-warning"></i>
+                                    <span class="small fw-semibold text-white">Instant Credit</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2 bg-white bg-opacity-10 px-3 py-2 rounded-pill">
+                                    <i class="fas fa-handshake text-warning"></i>
+                                    <span class="small fw-semibold text-white">Mutual Benefit</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-5 text-center text-lg-end">
+                            <div class="p-4 rounded-4 bg-white shadow-sm d-inline-block text-start w-100" style="max-width: 400px;">
+                                <p class="small text-uppercase fw-bold text-muted mb-2"><i class="fas fa-qrcode me-2 text-primary"></i>Your Referral Code</p>
+                                <div class="d-flex align-items-center justify-content-between bg-light rounded-3 p-2 border mb-4">
+                                    <span class="fs-3 fw-bold text-dark px-3" style="letter-spacing: 2px;">{{ Auth::user()->referral_code ?? 'N/A' }}</span>
+                                    <button class="btn btn-primary rounded-3 px-3 py-2 fw-bold shadow-sm" 
+                                            onclick="copyToClipboard('{{ Auth::user()->referral_code ?? '' }}', 'Referral code copied!')">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                                
+                                <p class="small text-uppercase fw-bold text-muted mb-2"><i class="fas fa-link me-2 text-primary"></i>Your Share Link</p>
+                                <div class="d-flex align-items-center justify-content-between bg-light rounded-3 p-2 border">
+                                    <span class="small text-muted text-truncate px-2" style="max-width: 200px;">{{ url('register') }}?ref={{ Auth::user()->referral_code ?? '' }}</span>
+                                    <button class="btn btn-outline-primary btn-sm rounded-3 px-3 py-2 fw-bold" 
+                                            onclick="copyToClipboard('{{ url('register') }}?ref={{ Auth::user()->referral_code ?? '' }}', 'Link copied!')">
+                                        <i class="fas fa-share-nodes me-1"></i> Share
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Create Virtual Account Modal -->
         <div class="modal fade" id="virtualAccountModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">

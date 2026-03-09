@@ -141,7 +141,19 @@
                                                     <td class="text-center">{{ $data->created_at->format('d M Y') }}</td>
                                                     <td>
                                                         @php
-                                                            $metadata = json_decode($data->metadata, true);
+                                                            $metadata = $data->metadata;
+
+                                                            if (is_string($metadata)) {
+                                                                $decoded = json_decode($metadata, true);
+                                                                if (json_last_error() === JSON_ERROR_NONE) {
+                                                                    $metadata = $decoded;
+                                                                }
+                                                            } elseif ($metadata instanceof \Illuminate\Contracts\Support\Arrayable) {
+                                                                $metadata = $metadata->toArray();
+                                                            } elseif (is_object($metadata)) {
+                                                                $metadata = (array) $metadata;
+                                                            }
+
                                                             $serviceId = $metadata['service_id'] ?? 'N/A';
                                                             $discoName = strtoupper(str_replace('-', ' ', $serviceId));
                                                         @endphp

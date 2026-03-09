@@ -30,7 +30,20 @@
                         
                         <div class="card-body p-4 bg-white">
                             @php
-                                $meta = json_decode($transaction->metadata, true) ?? [];
+                                $meta = $transaction->metadata;
+
+                                if (is_string($meta)) {
+                                    $decoded = json_decode($meta, true);
+                                    if (json_last_error() === JSON_ERROR_NONE) {
+                                        $meta = $decoded;
+                                    }
+                                } elseif ($meta instanceof \Illuminate\Contracts\Support\Arrayable) {
+                                    $meta = $meta->toArray();
+                                } elseif (is_object($meta)) {
+                                    $meta = (array) $meta;
+                                }
+
+                                $meta = $meta ?? [];
                                 $apiResponse = $meta['api_response'] ?? [];
                                 $txContent = $apiResponse['content']['transactions'] ?? [];
                                 $commission = $txContent['commission'] ?? 0;

@@ -19,15 +19,15 @@ class SmeDataController extends Controller
 {
     use ActiveUsers;
 
-    // API Configuration - matching DataController
+    // API Configuration
     private function getApiBaseUrl()
     {
-        return env('AREWA_BASE_URL', 'https://api.arewasmart.com.ng/api/v1');
+        return env('GSUBZ_BASE_URL');
     }
 
     private function getApiToken()
     {
-        return env('AREWA_API_TOKEN');
+        return env('GSUBZ_API_KEY');
     }
 
     /**
@@ -145,23 +145,33 @@ class SmeDataController extends Controller
 
         $requestId = RequestIdHelper::generateRequestId();
 
-        // API Call to Arewa Smart
+        // API Call to GSUBZ
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->getApiToken(),
-                'Content-Type'  => 'application/json',
+            $apiKey = $this->getApiToken();
+            $serviceID = strtolower($plan->network) . '_sme'; // e.g., mtn_sme
+
+            $response = Http::asForm()->withHeaders([
+                'Authorization' => 'Bearer ' . $apiKey,
                 'Accept'        => 'application/json',
-                 ])->post($this->getApiBaseUrl() . '/sme-data/purchase', [
-                'network'    => $plan->network, // e.g., MTN
-                'mobileno'   => $mobile,
-                'plan_id'    => $planId,
-                'request_id' => $requestId,
+            ])->post($this->getApiBaseUrl(), [
+                'serviceID'  => $serviceID,
+                'plan'       => $planId,
+                'api'        => $apiKey,
+                'amount'     => '',
+                'phone'      => $mobile,
+                'requestID'  => $requestId,
             ]);
 
             $data = $response->json();
             Log::info('SME Data API Response', ['response' => $data]);
 
-            if ($response->successful() && isset($data['status']) && $data['status'] === 'success') {
+            // Try to handle varying success status responses from external API
+            $isSuccess = $response->successful();
+            if ($isSuccess && isset($data['status']) && in_array(strtolower((string)$data['status']), ['fail', 'failed', 'error', 'false'])) {
+                $isSuccess = false;
+            }
+
+            if ($isSuccess) {
                 // Success path
                 $wallet->decrement('balance', $payableAmount);
                 $apiData = $data['data'] ?? [];

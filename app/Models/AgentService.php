@@ -36,8 +36,8 @@ class AgentService extends Model
         'gender',
         'dob',
         'email',
-        'lga',
         'amount',
+        'lga',
         'state',
         'field_name',
         'service_name',
@@ -57,13 +57,11 @@ class AgentService extends Model
         'performed_by',
         'approved_by',
         'completed_by',
-        'amount',
         'submission_date',
         'status',
         'comment',
-
-        // New Columns
         'company_name',
+        'company_type',
         'registration_number',
         'phone_number',
         'city',
@@ -73,24 +71,39 @@ class AgentService extends Model
         'from_country',
         'to_country',
         'cac_certificate',
-        'company_type',
         'departure_date',
         'return_date',
         'trip_type',
         'visa_type',
         'applicant_class',
+        
+        // Business Address
+        'business_state',
+        'business_lga',
+        'business_city',
+        'business_house_number',
+        'business_street',
+        'business_description',
+        
+        // Director 2 Information
+        'director2_surname',
+        'director2_first_name',
+        'director2_middle_name',
+        'director2_phone',
+        'director2_gender',
+        'director2_dob',
+        'director2_email',
+        'director2_address',
     ];
-
-
-
 
     protected $casts = [
         'submission_date' => 'datetime',
         'departure_date' => 'date',
         'return_date' => 'date',
+        'dob' => 'date',
+        'director2_dob' => 'date',
+        'field' => 'array', // Cast JSON field to array
     ];
-
-
 
     /** Relationships */
 
@@ -101,7 +114,7 @@ class AgentService extends Model
 
     public function serviceField()
     {
-        return $this->belongsTo(ServiceField::class, 'field_code');
+        return $this->belongsTo(ServiceField::class, 'service_field_id');
     }
 
     public function transaction()
@@ -112,5 +125,144 @@ class AgentService extends Model
     public function service()
     {
         return $this->belongsTo(Service::class);
+    }
+
+    /** Accessors for file URLs */
+    public function getNinUrlAttribute()
+    {
+        $field = $this->field;
+
+        if (is_string($field)) {
+            $decoded = json_decode($field, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $field = $decoded;
+            }
+        } elseif ($field instanceof \Illuminate\Contracts\Support\Arrayable) {
+            $field = $field->toArray();
+        } elseif (is_object($field)) {
+            $field = (array) $field;
+        }
+        return $field['uploads']['nin'] ?? $this->nin_slip_url ?? null;
+    }
+
+    public function getSignatureUrlAttribute()
+    {
+        $field = $this->field;
+
+        if (is_string($field)) {
+            $decoded = json_decode($field, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $field = $decoded;
+            }
+        } elseif ($field instanceof \Illuminate\Contracts\Support\Arrayable) {
+            $field = $field->toArray();
+        } elseif (is_object($field)) {
+            $field = (array) $field;
+        }
+        return $field['uploads']['signature'] ?? null;
+    }
+
+    public function getPassportUrlAttribute()
+    {
+        $field = $this->field;
+
+        if (is_string($field)) {
+            $decoded = json_decode($field, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $field = $decoded;
+            }
+        } elseif ($field instanceof \Illuminate\Contracts\Support\Arrayable) {
+            $field = $field->toArray();
+        } elseif (is_object($field)) {
+            $field = (array) $field;
+        }
+        return $field['uploads']['passport'] ?? $this->passport_url ?? null;
+    }
+
+    public function getDirector2NinUrlAttribute()
+    {
+        $field = $this->field;
+
+        if (is_string($field)) {
+            $decoded = json_decode($field, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $field = $decoded;
+            }
+        } elseif ($field instanceof \Illuminate\Contracts\Support\Arrayable) {
+            $field = $field->toArray();
+        } elseif (is_object($field)) {
+            $field = (array) $field;
+        }
+        return $field['uploads']['director2_nin'] ?? null;
+    }
+
+    public function getDirector2SignatureUrlAttribute()
+    {
+        $field = $this->field;
+
+        if (is_string($field)) {
+            $decoded = json_decode($field, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $field = $decoded;
+            }
+        } elseif ($field instanceof \Illuminate\Contracts\Support\Arrayable) {
+            $field = $field->toArray();
+        } elseif (is_object($field)) {
+            $field = (array) $field;
+        }
+        return $field['uploads']['director2_signature'] ?? null;
+    }
+
+    public function getDirector2PassportUrlAttribute()
+    {
+        $field = $this->field;
+
+        if (is_string($field)) {
+            $decoded = json_decode($field, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $field = $decoded;
+            }
+        } elseif ($field instanceof \Illuminate\Contracts\Support\Arrayable) {
+            $field = $field->toArray();
+        } elseif (is_object($field)) {
+            $field = (array) $field;
+        }
+        return $field['uploads']['director2_passport'] ?? null;
+    }
+
+    /** Scopes */
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopeProcessing($query)
+    {
+        return $query->where('status', 'processing');
+    }
+
+    public function scopeSuccessful($query)
+    {
+        return $query->where('status', 'successful');
+    }
+
+    public function scopeFailed($query)
+    {
+        return $query->whereIn('status', ['failed', 'rejected']);
+    }
+
+    public function scopeByService($query, $serviceName)
+    {
+        return $query->where('service_name', $serviceName);
+    }
+
+    public function scopeByUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    public function scopeDateRange($query, $startDate, $endDate)
+    {
+        return $query->whereBetween('submission_date', [$startDate, $endDate]);
     }
 }

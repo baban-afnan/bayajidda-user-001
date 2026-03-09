@@ -129,10 +129,22 @@
                                                     <td>{{ $data->phone_number }}</td>
                                                     <td>
                                                         @php
-                                                            $meta = json_decode($data->description, true); // Assuming description might contain JSON or we parse it differently
+                                                            $meta = $data->description;
+
+                                                            if (is_string($meta)) {
+                                                                $decoded = json_decode($meta, true);
+                                                                if (json_last_error() === JSON_ERROR_NONE) {
+                                                                    $meta = $decoded;
+                                                                }
+                                                            } elseif ($meta instanceof \Illuminate\Contracts\Support\Arrayable) {
+                                                                $meta = $meta->toArray();
+                                                            } elseif (is_object($meta)) {
+                                                                $meta = (array) $meta;
+                                                            }
+
                                                             // Actually description is string, we might need to extract token from it or use a dedicated column if available.
                                                             // Based on previous implementation, token is in description "PIN: xxxx"
-                                                            preg_match('/PIN: (.*)/', $data->description, $matches);
+                                                            preg_match('/PIN: (.*)/', is_string($data->description) ? $data->description : (string)($data->description ?? ''), $matches);
                                                             $token = $matches[1] ?? 'N/A';
                                                         @endphp
                                                         <span class="fw-bold text-dark">{{ $token }}</span>

@@ -82,6 +82,27 @@
             </div>
         </div>
 
+        {{-- Referral Code Field --}}
+        <div class="mb-3">
+            <label class="tiny-label" for="referral_code">Referral Code (Optional)</label>
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="referral_code" 
+                    name="referral_code" 
+                    value="{{ old('referral_code', request('ref')) }}" 
+                    class="form-control @error('referral_code') is-invalid @enderror"
+                    placeholder="Enter referral code"
+                    {{ request()->has('ref') ? 'readonly' : '' }}>
+                <span class="input-group-text">
+                    <i class="ti ti-gift"></i>
+                </span>
+                @error('referral_code')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+        </div>
+
         {{-- Terms & Conditions --}}
         <div class="mb-4">
             <div class="form-check">

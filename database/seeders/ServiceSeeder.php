@@ -162,6 +162,10 @@ class ServiceSeeder extends Seeder
                 ['name' => 'Incorporated Trustee (NGO)', 'code' => 'cac-it', 'price' => 120000],
             ]);
 
+            // NEW USER 
+            ServiceManager::getServiceWithFields('NEW USER', [
+                ['name' => 'new user registration', 'code' => 'new-user', 'price' => 200],
+            ]);
         
     }
 }

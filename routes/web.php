@@ -252,6 +252,8 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('cac-reg')->group(function () {
         Route::get('/', [App\Http\Controllers\Agency\CacRegistrationController::class, 'index'])->name('cac.index');
         Route::post('/', [App\Http\Controllers\Agency\CacRegistrationController::class, 'store'])->name('cac.store');
+        Route::get('/show/{reference}', [App\Http\Controllers\Agency\CacRegistrationController::class, 'show'])->name('cac.show');
+        Route::get('/download/{reference}/{fileType}', [App\Http\Controllers\Agency\CacRegistrationController::class, 'downloadFile'])->name('cac.download');
     });
 
     // Visa Services
