@@ -88,10 +88,19 @@ class SmeDataController extends Controller
     {
         $network = $request->id;
         $type = $request->type;
+        $user = Auth::user();
+        $role = $user->user_type ?? 'user';
+
         $plans = SmeData::where('network', $network)
             ->where('plan_type', $type)
-            ->where('status', 'enabled')
+            ->where('status', 1)
             ->get();
+            
+        foreach ($plans as $plan) {
+            $finalPrice = $plan->calculatePriceForRole($role);
+            $plan->formatted_text = "{$plan->size} {$plan->plan_type} (₦" . number_format((float)$finalPrice, 2) . ") {$plan->validity}";
+        }
+
         return response()->json($plans);
     }
 
@@ -165,11 +174,8 @@ class SmeDataController extends Controller
             $data = $response->json();
             Log::info('SME Data API Response', ['response' => $data]);
 
-            // Try to handle varying success status responses from external API
-            $isSuccess = $response->successful();
-            if ($isSuccess && isset($data['status']) && in_array(strtolower((string)$data['status']), ['fail', 'failed', 'error', 'false'])) {
-                $isSuccess = false;
-            }
+            // Check if response code is exactly 200
+            $isSuccess = $response->status() == 200;
 
             if ($isSuccess) {
                 // Success path

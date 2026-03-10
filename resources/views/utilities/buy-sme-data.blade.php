@@ -48,7 +48,7 @@
                                     <select name="network" id="service_id" class="form-select text-center" required>
                                         <option value="">Choose Network</option>
                                         @foreach ($networks as $network)
-                                            <option value="{{ $network->network }}">{{ $network->network }}</option>
+                                            <option value="{{ $network->network }}">{{ strtoupper($network->network) }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -204,7 +204,7 @@
                     $("#plan").append("<option value=''>Data Plan</option>");
 
                     for (var i = 0; i < len; i++) {
-                        var plan_text = response[i]["size"] + " " + response[i]["plan_type"] + " (" + response[i]["amount"] + ") " + response[i]["validity"];
+                        var plan_text = response[i]["formatted_text"] || (response[i]["size"] + " " + response[i]["plan_type"] + " (₦" + response[i]["amount"] + ") " + response[i]["validity"]);
                         var id = response[i]["data_id"];
                         $("#plan").append("<option value='" + id + "'>" + plan_text + "</option>");
                     }
