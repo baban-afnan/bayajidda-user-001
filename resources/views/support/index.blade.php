@@ -28,7 +28,7 @@
                             
                             <div class="d-grid gap-3">
                                 <!-- WhatsApp -->
-                                <a href="https://wa.me/+2347036826500" target="_blank" class="btn btn-outline-success border-2 fw-semibold d-flex align-items-center justify-content-center py-2">
+                                <a href="https://wa.me/+971556461852" target="_blank" class="btn btn-outline-success border-2 fw-semibold d-flex align-items-center justify-content-center py-2">
                                     <i class="bi bi-whatsapp fs-5 me-2"></i> WhatsApp
                                 </a>
 
