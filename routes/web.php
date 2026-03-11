@@ -15,6 +15,8 @@ use App\Http\Controllers\Action\SmeDataController;
 use App\Http\Controllers\Action\EducationalController;
 use App\Http\Controllers\Action\ElectricityController;
 use App\Http\Controllers\Action\CableController;
+use App\Http\Controllers\Action\KiraniController;
+use App\Http\Controllers\Action\SmileController;
 
 // Verification Controllers
 use App\Http\Controllers\NINverificationController;
@@ -95,6 +97,18 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('airtime')->group(function () {
         Route::get('/', [AirtimeController::class, 'airtime'])->name('airtime');
         Route::post('/buy', [AirtimeController::class, 'buyAirtime'])->name('buyairtime');
+    });
+
+    // Kirani Minutes Data
+    Route::prefix('kirani')->group(function () {
+        Route::get('/', [KiraniController::class, 'index'])->name('kirani.index');
+        Route::post('/buy', [KiraniController::class, 'buy'])->name('kirani.buy');
+    });
+
+    // Smile Data
+    Route::prefix('smile')->group(function () {
+        Route::get('/', [SmileController::class, 'index'])->name('smile.index');
+        Route::post('/buy', [SmileController::class, 'buy'])->name('smile.buy');
     });
 
     // Standard Data
@@ -260,6 +274,11 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('visa')->group(function () {
         Route::get('/', [VisaController::class, 'index'])->name('visa.index');
         Route::post('/', [VisaController::class, 'store'])->name('visa.store');
+    });
+    // Esim Services
+    Route::prefix('esim')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Agency\EsimController::class, 'index'])->name('esim.index');
+        Route::post('/', [\App\Http\Controllers\Agency\EsimController::class, 'store'])->name('esim.store');
     });
 });
 

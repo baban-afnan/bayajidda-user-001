@@ -306,25 +306,36 @@
                         </div>
 
 
-                           <!-- network smile -->
+                        <!-- network kirani -->
                         <div class="col">
-                            <a href="#" class="text-decoration-none service-item">
+                            <a href="{{ route('kirani.index') }}" class="text-decoration-none service-item">
                                 <div class="service-icon-wrap mb-2 mx-auto">
                                     <i class="ti ti-file-certificate fs-24 text-warning"></i>
                                 </div>
-                                <span class="fs-13 fw-medium text-dark d-block">Kirani</span>
+                                <span class="fs-13 fw-medium text-dark d-block">Kirani Minutes</span>
                             </a>
                         </div>
 
-                           <!-- Kirani esin-->
+                           <!-- Kirani smile-->
                         <div class="col">
-                            <a href="#" class="text-decoration-none service-item">
+                            <a href="{{ route('smile.index') }}" class="text-decoration-none service-item">
                                 <div class="service-icon-wrap mb-2 mx-auto">
                                     <i class="ti ti-file-certificate fs-24 text-info"></i>
                                 </div>
-                                <span class="fs-13 fw-medium text-dark d-block">Alfa</span>
+                                <span class="fs-13 fw-medium text-dark d-block">Smile </span>
                             </a>
                         </div>
+
+                        <!-- esim card -->
+                        <div class="col">
+                            <a href="{{ route('esim.index') }}" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                 <i class="ti ti-file-certificate fs-24 text-info"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">ESIM Card</span>
+                            </a>
+                        </div>
+                        
 
                         <!-- Support -->
                         <div class="col">

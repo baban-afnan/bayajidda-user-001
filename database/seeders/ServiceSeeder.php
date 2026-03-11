@@ -166,6 +166,12 @@ class ServiceSeeder extends Seeder
             ServiceManager::getServiceWithFields('NEW USER', [
                 ['name' => 'new user registration', 'code' => 'new-user', 'price' => 200],
             ]);
+
+            // ESIM Service
+            ServiceManager::getServiceWithFields('Esim', [
+                ['name' => 'register with my information', 'code' => 'esim-register', 'price' => 100],
+                ['name' => 'dont register with my information', 'code' => 'esim-dont-register', 'price' => 100],
+            ]);
         
     }
 }
