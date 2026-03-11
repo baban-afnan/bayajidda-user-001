@@ -74,6 +74,7 @@ class EsimController extends Controller
             'middle_name'      => 'nullable|string|max:255',
             'email'            => 'required|email|max:255',
             'phone_number'     => 'required|string|max:20',
+            'nin'              => 'required|string|size:11|regex:/^[0-9]{11}$/',
             'address'          => 'required|string|max:1000',
             'photo_file'       => 'required|file|mimes:jpg,jpeg,png|max:5120',
         ]);
@@ -134,6 +135,7 @@ class EsimController extends Controller
                     'service_field' => $serviceField->field_name,
                     'email' => $validated['email'],
                     'phone_number' => $validated['phone_number'],
+                    'nin' => $validated['nin'],
                     'full_name' => $fullName,
                     'address' => $validated['address'],
                     'photo_url' => $photoUrl,
@@ -156,6 +158,7 @@ class EsimController extends Controller
                 'middle_name' => $validated['middle_name'],
                 'email' => $validated['email'],
                 'phone_number' => $validated['phone_number'],
+                'nin' => $validated['nin'],
                 'description' => $validated['address'], // Address maps to Description text block
                 'passport_url' => $photoUrl,            // Photo maps to Passport_URL string
 

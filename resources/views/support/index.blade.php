@@ -33,12 +33,12 @@
                                 </a>
 
                                 <!-- Facebook -->
-                                <a href="https://www.facebook.com/katsinanews?mibextid=ZbWKwL" target="_blank" class="btn btn-outline-primary border-2 fw-semibold d-flex align-items-center justify-content-center py-2">
+                                <a href="#" target="_blank" class="btn btn-outline-primary border-2 fw-semibold d-flex align-items-center justify-content-center py-2">
                                     <i class="bi bi-facebook fs-5 me-2"></i> Facebook
                                 </a>
 
                                 <!-- TikTok -->
-                                <a href="https://www.tiktok.com/@ssafana?_r=1&_t=ZS-93SEZ246vAm" target="_blank" class="btn btn-outline-dark border-2 fw-semibold d-flex align-items-center justify-content-center py-2">
+                                <a href="#" target="_blank" class="btn btn-outline-dark border-2 fw-semibold d-flex align-items-center justify-content-center py-2">
                                     <i class="bi bi-tiktok fs-5 me-2"></i> TikTok
                                 </a>
 

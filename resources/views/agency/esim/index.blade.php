@@ -84,6 +84,15 @@
                                     </div>
                                 </div>
 
+                                 <div class="col-md-4">
+                                    <label class="form-label fw-bold">NIN <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input class="form-control" name="nin" type="text" required
+                                               placeholder="NIN No" maxlength="11">
+                                    </div>
+                                </div>
+
+
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold">Email <span class="text-danger">*</span></label>
                                     <div class="input-group">
