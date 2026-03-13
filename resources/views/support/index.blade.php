@@ -33,12 +33,12 @@
                                 </a>
 
                                 <!-- Facebook -->
-                                <a href="#" target="_blank" class="btn btn-outline-primary border-2 fw-semibold d-flex align-items-center justify-content-center py-2">
+                                <a href="https://www.facebook.com/share/1DpEj2oewX/" target="_blank" class="btn btn-outline-primary border-2 fw-semibold d-flex align-items-center justify-content-center py-2">
                                     <i class="bi bi-facebook fs-5 me-2"></i> Facebook
                                 </a>
 
                                 <!-- TikTok -->
-                                <a href="#" target="_blank" class="btn btn-outline-dark border-2 fw-semibold d-flex align-items-center justify-content-center py-2">
+                                <a href=" https://www.tiktok.com/@idris_1414?_r=1&_t=ZS-94cpEqtAG4z" target="_blank" class="btn btn-outline-dark border-2 fw-semibold d-flex align-items-center justify-content-center py-2">
                                     <i class="bi bi-tiktok fs-5 me-2"></i> TikTok
                                 </a>
 
@@ -50,7 +50,7 @@
 
                             <div class="mt-4 p-3 bg-light rounded-3 border">
                                 <h6 class="fw-bold text-primary mb-2"><i class="bi bi-envelope me-2"></i>Email Support</h6>
-                                <p class="small text-muted mb-0">support@imamdata.com.ng</p>
+                                <p class="small text-muted mb-0">bayajiddaglobal001@gmail.com</p>
                             </div>
                         </div>
                     </div>
