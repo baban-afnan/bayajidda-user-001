@@ -174,8 +174,11 @@ class SmeDataController extends Controller
             $data = $response->json();
             Log::info('SME Data API Response', ['response' => $data]);
 
-            // Check if response code is exactly 200
-            $isSuccess = $response->status() == 200;
+            // Check if response code is 200 and status is TRANSACTION_SUCCESSFUL in the JSON body
+            $apiCode = $data['code'] ?? null;
+            $apiStatus = $data['status'] ?? null;
+            
+            $isSuccess = ($response->status() == 200 && $apiCode == 200 && $apiStatus == "TRANSACTION_SUCCESSFUL");
 
             if ($isSuccess) {
                 // Success path
