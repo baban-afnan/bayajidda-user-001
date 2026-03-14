@@ -189,7 +189,7 @@ class SmeDataController extends Controller
                 'amount'          => $payableAmount,
                 'description'     => "SME Data purchase: " . $description,
                 'type'            => 'debit',
-                'status'          => 'processing',
+                'status'          => 'completed',
                 'service_type'    => 'sme_data',
                 'performed_by'    => $performedBy,
                 'approved_by'     => $user->id,
