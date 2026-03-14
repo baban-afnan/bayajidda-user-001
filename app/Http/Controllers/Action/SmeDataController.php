@@ -15,6 +15,9 @@ use App\Traits\ActiveUsers;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
+use App\Models\Service;
+use Illuminate\Support\Str;
+
 class SmeDataController extends Controller
 {
     use ActiveUsers;
@@ -138,24 +141,70 @@ class SmeDataController extends Controller
         $mobile = $request->mobileno;
         $planId = $request->plan;
         
+        // 1. Validate request and find plan
         $plan = SmeData::where('data_id', $planId)->first();
         if (!$plan) {
             return back()->with('error', 'Invalid data plan selected.');
         }
 
-        $payableAmount = $plan->calculatePriceForRole($user->user_type ?? 'user');
-        $description = "{$plan->size} {$plan->plan_type} for {$mobile} ({$plan->network})";
+        // 2. Ensure Service Exists and is Active
+        $service = Service::firstOrCreate(
+            ['name' => 'SME Data'],
+            ['is_active' => 1]
+        );
 
-        // Check Wallet Balance
-        $wallet = Wallet::where('user_id', $user->id)->first();
-        if (!$wallet || $wallet->balance < $payableAmount) {
-            return redirect()->back()->with('error', 'Insufficient wallet balance! You need ₦' . number_format($payableAmount, 2));
+        if (!$service->is_active) {
+            return back()->with('error', 'SME Data service is currently unavailable.');
         }
 
+        // 3. Calculate Price
+        $payableAmount = $plan->calculatePriceForRole($user->user_type ?? 'user');
+        $description = "{$plan->size} {$plan->plan_type} for {$mobile} ({$plan->network})";
         $requestId = RequestIdHelper::generateRequestId();
+        $performedBy = $user->first_name . ' ' . $user->last_name;
 
-        // API Call to GSUBZ
+        DB::beginTransaction();
+
         try {
+            // 4. Lock Wallet Row & Check Active
+            $wallet = Wallet::where('user_id', $user->id)->lockForUpdate()->first();
+            
+            if (!$wallet) {
+                return back()->with('error', 'Wallet not found.');
+            }
+
+            if ($wallet->status !== 'active') {
+                return back()->with('error', 'Your wallet is not active.');
+            }
+
+            // 5. Check Balance
+            if ($wallet->balance < $payableAmount) {
+                return redirect()->back()->with('error', 'Insufficient wallet balance! You need ₦' . number_format($payableAmount, 2));
+            }
+
+            // 6. Create Transaction (Pending/Processing)
+            $transaction = Transaction::create([
+                'transaction_ref' => $requestId,
+                'user_id'         => $user->id,
+                'amount'          => $payableAmount,
+                'description'     => "SME Data purchase: " . $description,
+                'type'            => 'debit',
+                'status'          => 'processing',
+                'service_type'    => 'sme_data',
+                'performed_by'    => $performedBy,
+                'approved_by'     => $user->id,
+                'metadata'        => [
+                    'phone'   => $mobile,
+                    'network' => $plan->network,
+                    'plan_id' => $planId,
+                ]
+            ]);
+
+            // 7. Debit Wallet
+            $wallet->decrement('balance', $payableAmount);
+
+        
+            // 8. API Call to GSUBZ
             $apiKey = $this->getApiToken();
             $serviceID = strtolower($plan->network) . '_sme'; // e.g., mtn_sme
 
@@ -174,58 +223,55 @@ class SmeDataController extends Controller
             $data = $response->json();
             Log::info('SME Data API Response', ['response' => $data]);
 
-            // Check if response code is 200 and status is TRANSACTION_SUCCESSFUL in the JSON body
             $apiCode = $data['code'] ?? null;
             $apiStatus = $data['status'] ?? null;
             
+            // Check success and failed status
             $isSuccess = ($response->status() == 200 && $apiCode == 200 && $apiStatus == "TRANSACTION_SUCCESSFUL");
+            $isFailed = (strtoupper($apiStatus) == 'FAILED' || $apiCode == 400); // 400 often means validation/insufficient vendor balance
 
             if ($isSuccess) {
-                // Success path
-                $wallet->decrement('balance', $payableAmount);
-                $apiData = $data['data'] ?? [];
-                $transactionRef = $apiData['transaction_ref'] ?? $requestId;
+                // Success: Update and Commit
+                $transaction->update(['status' => 'completed']);
                 
-                // Extract plan info from response if available, otherwise use our description
-                $apiDescription = $apiData['plan'] ?? $description;
-
-                Transaction::create([
-                    'transaction_ref' => $transactionRef,
-                    'user_id'         => $user->id,
-                    'amount'          => $payableAmount,
-                    'description'     => "SME Data purchase: " . $apiDescription,
-                    'type'            => 'debit',
-                    'status'          => 'completed',
-                    'metadata'        => json_encode([
-                        'phone'        => $mobile,
-                        'network'      => $plan->network,
-                        'plan_type'    => $plan->plan_type,
-                        'data_id'      => $planId,
-                        'api_response' => $data,
-                        'api_data'     => $apiData
-                    ]),
-                    'performed_by' => $user->first_name . ' ' . $user->last_name,
-                    'approved_by'  => $user->id,
-                ]);
+                DB::commit();
 
                 return redirect()->route('thankyou')->with([
                     'success'         => 'Data purchase successful!',
-                    'transaction_ref' => $transactionRef,
+                    'transaction_ref' => $requestId,
                     'request_id'      => $requestId,
                     'mobile'          => $mobile,
                     'network'         => $plan->network,
                     'amount'          => $payableAmount,
                     'paid'            => $payableAmount,
-                    'type'            => 'data'
+                    'type'            => 'SME Data'
                 ]);
-            } else {
+            } elseif ($isFailed) {
+                // Confirmed Failure: Rollback
+                DB::rollBack();
                 $errorMessage = $data['message'] ?? 'Data purchase failed. Please try again.';
                 return redirect()->back()->with('error', $errorMessage);
+            } else {
+                // Else (Processing/Unknown): Keep debit and Commit
+                // The wallet is already debited and records are in 'processing' state.
+                DB::commit();
+                
+                return redirect()->route('thankyou')->with([
+                    'success'         => 'Transaction is being processed. Please check your history in a few minutes.',
+                    'transaction_ref' => $requestId,
+                    'request_id'      => $requestId,
+                    'mobile'          => $mobile,
+                    'network'         => $plan->network,
+                    'amount'          => $payableAmount,
+                    'paid'            => $payableAmount,
+                    'type'            => 'SME Data'
+                ]);
             }
 
         } catch (\Exception $e) {
-            Log::error('SME Data API Connection Error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Could not connect to data provider. Please try again later.');
+            DB::rollBack();
+            Log::error('SME Data Purchase Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'An error occurred while processing your request. Please try again later.');
         }
     }
 }
