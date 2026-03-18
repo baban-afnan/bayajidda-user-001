@@ -132,8 +132,7 @@
                         <span class="menu-arrow"></span>
                       </a>
                     <ul>
-                        <li><a href="#">Kirani</a></li>
-                        <li><a href="#">ummita</a></li>
+                        <li><a href="{{ route('esim.index') }}" class="{{request() ->routeIs('esim.index') ? 'active' : '' }}">Kirani</a></li>
                     </ul>
                 </li>
 
