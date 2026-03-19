@@ -158,7 +158,7 @@
     </div>
 <div class="row mt-3">
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@push('scripts')
     <script>
     $(document).ready(function () {
         $("#service_id").change(function () {
@@ -179,6 +179,12 @@
                         var plan_type = response[i]["plan_type"];
                         $("#type").append("<option value='" + plan_type + "'>" + plan_type + "</option>");
                     }
+                    
+                    // Auto-select if only one type exists
+                    if (len === 1) {
+                        $("#type").val(response[0]["plan_type"]).trigger('change');
+                    }
+
                     $("#plan").empty().append("<option value=''>Select Plan</option>");
                     $("#amountToPay").val("");
                 },
@@ -281,5 +287,6 @@
         });
     });
     </script>
+@endpush
 
 </x-app-layout>

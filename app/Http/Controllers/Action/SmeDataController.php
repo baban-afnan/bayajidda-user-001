@@ -76,8 +76,9 @@ class SmeDataController extends Controller
      */
     public function fetchDataType(Request $request)
     {
-        $network = $request->id;
-        $types = SmeData::where('network', $network)
+        $network = trim($request->id);
+        $types = SmeData::where('network', 'LIKE', $network)
+            ->where('status', 'active')
             ->select('plan_type')
             ->distinct()
             ->get();
@@ -89,14 +90,14 @@ class SmeDataController extends Controller
      */
     public function fetchDataPlan(Request $request)
     {
-        $network = $request->id;
-        $type = $request->type;
+        $network = trim($request->id);
+        $type = trim($request->type);
         $user = Auth::user();
         $role = $user->user_type ?? 'user';
 
-        $plans = SmeData::where('network', $network)
-            ->where('plan_type', $type)
-            ->where('status', 1)
+        $plans = SmeData::where('network', 'LIKE', $network)
+            ->where('plan_type', 'LIKE', $type)
+            ->where('status', 'active')
             ->get();
             
         foreach ($plans as $plan) {
