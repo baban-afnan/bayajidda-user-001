@@ -214,6 +214,16 @@
                             </a>
                         </div>
 
+                           <!-- tv subcription -->
+                        <div class="col">
+                            <a href="{{ route('tv') }}" class="text-decoration-none service-item">
+                                <div class="service-icon-wrap mb-2 mx-auto">
+                                    <i class="ti ti-tv fs-24 text-primary"></i>
+                                </div>
+                                <span class="fs-13 fw-medium text-dark d-block">Tv Subcription</span>
+                            </a>
+                        </div>
+
                         <!-- BVN Services -->
                         <div class="col">
                             <a href="#" data-bs-toggle="modal" data-bs-target="#bvnServicesModal" class="text-decoration-none service-item">
