@@ -151,12 +151,32 @@
             <div class="modal-content rounded-4 shadow-lg border-0">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title text-white fw-semibold" id="pinModalLabel">
-                        <i class="bi bi-shield-lock-fill me-2"></i> Confirm Transaction PIN
+                        <i class="bi bi-shield-lock-fill me-2"></i> Confirm Transaction
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body text-center py-4">
+                    <div class="mb-4 text-start bg-light p-3 rounded-3 border">
+                        <h6 class="fw-bold border-bottom pb-2 mb-2">Transaction Summary</h6>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Service:</span>
+                            <span id="modal-service-name" class="fw-semibold text-primary">Airtime</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Network:</span>
+                            <span id="modal-network" class="fw-semibold"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Phone Number:</span>
+                            <span id="modal-phone" class="fw-semibold"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 pt-2 border-top">
+                            <span class="fw-bold">Amount:</span>
+                            <span id="modal-amount" class="fw-bold text-danger"></span>
+                        </div>
+                    </div>
+
                     <p class="text-muted mb-3 small">
                         Please enter your <strong>5-digit PIN</strong> to confirm this transaction.
                     </p>
@@ -169,7 +189,8 @@
                 <div class="modal-footer border-0 justify-content-center pb-4">
                     <button type="button" class="btn btn-light px-4 rounded-pill" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" id="confirmPinBtn" class="btn btn-primary px-4 rounded-pill fw-semibold">
-                        Confirm & Proceed
+                        <span class="spinner-border spinner-border-sm me-2 d-none" id="pinLoader" role="status" aria-hidden="true"></span>
+                        <span id="confirmPinText">Confirm & Proceed</span>
                     </button>
                 </div>
             </div>
@@ -232,6 +253,19 @@
 
                 // --- Handle Buy Click ---
                 buyButton.addEventListener('click', function () {
+                    const network = selectedNetworkInput.value;
+                    const amount = amountInput.value;
+                    const phone = phoneInput.value;
+
+                    if (!network || !amount || !phone) {
+                        alert("Please fill all fields first.");
+                        return;
+                    }
+
+                    document.getElementById('modal-network').textContent = network.toUpperCase();
+                    document.getElementById('modal-phone').textContent = phone;
+                    document.getElementById('modal-amount').textContent = '₦' + parseFloat(amount).toLocaleString();
+
                     const pinModal = new bootstrap.Modal(document.getElementById('pinModal'));
                     pinModal.show();
                 });
@@ -240,9 +274,18 @@
                 confirmButton.addEventListener('click', function () {
                     const pin = document.getElementById('pinInput').value;
                     const pinError = document.getElementById('pinError');
+                    const loader = document.getElementById('pinLoader');
+                    const confirmText = document.getElementById('confirmPinText');
+
+                    if(pin.length !== 5) {
+                        pinError.classList.remove('d-none');
+                        pinError.textContent = "PIN must be 5 digits.";
+                        return;
+                    }
 
                     this.disabled = true;
-                    this.innerHTML = '<i class="bi bi-arrow-repeat spinner-border spinner-border-sm"></i> Verifying...';
+                    loader.classList.remove('d-none');
+                    confirmText.textContent = 'Verifying...';
 
                     fetch("{{ route('verify.pin') }}", {
                         method: "POST",
@@ -250,7 +293,7 @@
                             "Content-Type": "application/json",
                             "X-CSRF-TOKEN": "{{ csrf_token() }}"
                         },
-                        body: JSON.stringify({ pin })
+                        body: JSON.stringify({ pin: pin })
                     })
                     .then(res => res.json())
                     .then(data => {
@@ -258,14 +301,17 @@
                             document.getElementById('buyAirtimeForm').submit();
                         } else {
                             pinError.classList.remove('d-none');
+                            pinError.textContent = "Incorrect PIN. Please try again.";
                             this.disabled = false;
-                            this.innerHTML = 'Confirm & Proceed';
+                            loader.classList.add('d-none');
+                            confirmText.textContent = 'Confirm & Proceed';
                         }
                     })
                     .catch(() => {
                         alert("Network error, please try again.");
                         this.disabled = false;
-                        this.innerHTML = 'Confirm & Proceed';
+                        loader.classList.add('d-none');
+                        confirmText.textContent = 'Confirm & Proceed';
                     });
                 });
             });

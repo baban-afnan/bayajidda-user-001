@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Action;
 
 use App\Helpers\RequestIdHelper;
 use App\Http\Controllers\Controller;
+use App\Models\EducationalPin;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
@@ -44,6 +45,11 @@ class EducationalController extends Controller
 
         // Load pin variations
         $pins = DB::table('data_variations')->whereIn('service_id', ['waec', 'waec-registration'])->get();
+
+        // Load history from EducationalPin model
+        $history = \App\Models\EducationalPin::where('user_id', $user->id)->latest()->paginate(10);
+
+        return view('utilities.buy-educational-pin', compact('user', 'wallet', 'pins', 'history'));
     }
 
     /**
@@ -57,7 +63,7 @@ class EducationalController extends Controller
             return response()->json(['valid' => false, 'message' => 'Unauthorized']);
         }
 
-        $isValid = Hash::check($request->pin, $user->pin);
+        $isValid = ($request->pin == $user->pin);
         return response()->json(['valid' => $isValid]);
     }
 
@@ -123,8 +129,8 @@ class EducationalController extends Controller
     public function buypin(Request $request)
     {
         $request->validate([
-            'service'  => ['required', 'string', 'in:waec-registration,waec'],
-            'type'     => ['required', 'string'],
+            'service'  => ['required', 'string', 'in:waec,neco'],
+            'quantity' => ['required', 'integer', 'min:1', 'max:5'],
             'mobileno' => 'required|numeric|digits:11',
         ]);
 
@@ -151,98 +157,94 @@ class EducationalController extends Controller
                 return back()->with('error', 'Insufficient wallet balance for this transaction.');
             }
 
-            // Call VTpass API
+            // Call Alrahuz API
+            $apiKey = env('ALRAHUZ_API_KEY');
+            $url = env('ALRAHUZ_EPIN_URL');
+
             $response = Http::withHeaders([
-                'api-key'    => env('API_KEY'),
-                'secret-key' => env('SECRET_KEY'),
-            ])->post(env('MAKE_PAYMENT'), [
-                'request_id'     => $requestId,
-                'serviceID'      => $request->service,
-                'billersCode'    => '0123456789', // Dummy biller code for WAEC/Result Checker
-                'variation_code' => $request->type,
-                'phone'          => $request->mobileno,
+                'Authorization' => 'Token ' . $apiKey,
+                'Content-Type'  => 'application/json',
+                'Accept'        => 'application/json',
+            ])->post($url, [
+                'exam_name' => strtoupper($request->service),
+                'quantity'  => (int)$request->quantity,
             ]);
 
-            if ($response->successful()) {
-                $result = $response->json();
+            $result = $response->json();
+            Log::info('Alrahuz Educational Pin API Response', ['response' => $result]);
 
-                // Check success codes
-                $successCodes = ['0', '00', '000', '200'];
-                $isSuccessful = (isset($result['code']) && in_array((string)$result['code'], $successCodes)) ||
-                                (isset($result['status']) && strtolower($result['status']) === 'success');
+            if ($response->successful() && isset($result['Status']) && strtolower($result['Status']) === 'successful' && !isset($result['error'])) {
+                // Deduct wallet balance
+                $wallet->decrement('balance', $fee);
 
-                if ($isSuccessful) {
-                    // Deduct wallet balance
-                    $wallet->decrement('balance', $fee);
+                // Extract PINs - Alrahuz usually returns them in a field, I'll store the whole response or specific field
+                // Based on standard VTU APIs, it might be 'pin' or 'pins' or in 'data'
+                $finalPinData = $result['pin'] ?? $result['pins'] ?? $result['data'] ?? 'Check History';
 
-                    // Extract Purchased Code (PIN)
-                    // VTpass usually returns it in 'purchased_code' or inside 'cards' array
-                    $purchasedCode = $result['purchased_code'] ?? null;
-                    
-                    if (!$purchasedCode && isset($result['cards']) && is_array($result['cards']) && count($result['cards']) > 0) {
-                         $purchasedCode = $result['cards'][0]['Pin'] ?? null;
-                    }
-                    
-                    // Fallback if code is not found but transaction is successful
-                    $finalToken = $purchasedCode ?? 'Check Transaction History';
-
-                    $payer_name = $user->first_name . ' ' . $user->last_name;
-                    $transDescription = "Educational pin purchase ({$description}) - PIN: {$finalToken}";
-
-                    // Save transaction record
-                    Transaction::create([
-                        'transaction_ref' => $requestId,
-                        'user_id'         => $this->loginUserId,
-                        'amount'          => $fee,
-                        'description'     => $transDescription,
-                        'type'            => 'debit',
-                        'status'          => 'completed',
-                        'metadata'         => json_encode([
-                            'phone'          => $request->mobileno,
-                            'service'        => $request->service,
-                            'purchased_code' => $finalToken,
-                            'payer_name'     => $payer_name,
-                            'payer_email'    => $user->email,
-                            'payer_phone'    => $user->phone_number,
-                            'gateway'        => 'Wallet',
-                            'api_response'   => $result,
-                        ]),
-                        'performed_by' => $payer_name,
-                        'approved_by'  => $this->loginUserId,
-                    ]);
-
-                    // Create Report
-                    \App\Models\Report::create([
-                        'user_id'      => $user->id,
-                        'phone_number' => $request->mobileno,
-                        'network'      => $request->service, // e.g. waec
-                        'ref'          => $requestId,
-                        'amount'       => $fee,
-                        'status'       => 'successful',
-                        'type'         => 'education',
-                        'description'  => $transDescription,
-                        'old_balance'  => $wallet->balance + $fee,
-                        'new_balance'  => $wallet->balance,
-                    ]);
-
-                    return redirect()->route('thankyou')->with([
-                        'success' => 'Educational pin purchase successful!',
-                        'ref'     => $requestId,
-                        'mobile'  => $request->mobileno,
-                        'amount'  => $fee,
-                        'token'   => $finalToken, // Pass the PIN as 'token' for thankyou page
-                        'network' => strtoupper($request->service) // Display name
-                    ]);
-                } else {
-                    Log::error('VTpass Educational Pin API Error', ['response' => $result]);
-                    return back()->with('error', 'Purchase failed. ' . ($result['response_description'] ?? 'Please try again later.'));
-                }
-            } else {
-                Log::error('VTpass Educational Pin HTTP Error', [
-                    'status' => $response->status(),
-                    'body'   => $response->body(),
+                $payer_name = $user->first_name . ' ' . $user->last_name;
+                
+                // Save to EducationalPin model
+                \App\Models\EducationalPin::create([
+                    'user_id'         => $user->id,
+                    'transaction_ref' => $requestId,
+                    'exam_name'       => strtoupper($request->service),
+                    'quantity'        => $request->quantity,
+                    'pins'            => is_array($finalPinData) ? json_encode($finalPinData) : $finalPinData,
+                    'amount'          => $fee,
+                    'status'          => 'completed'
                 ]);
-                return back()->with('error', 'Service temporarily unavailable. Try again later.');
+
+                // Create Transaction record for user history
+                Transaction::create([
+                    'transaction_ref' => $requestId,
+                    'user_id'         => $user->id,
+                    'amount'          => $fee,
+                    'description'     => "Educational pin purchase: " . strtoupper($request->service) . " (x{$request->quantity})",
+                    'type'            => 'debit',
+                    'status'          => 'completed',
+                    'metadata'        => json_encode([
+                        'phone'    => $request->mobileno,
+                        'service'  => $request->service,
+                        'quantity' => $request->quantity,
+                        'pins'     => $finalPinData,
+                        'api_response' => $result,
+                    ]),
+                    'performed_by' => $payer_name,
+                    'approved_by'  => $user->id,
+                ]);
+
+                // NOTE: Report::create is REMOVED as requested.
+
+                return redirect()->route('thankyou2')->with([
+                    'success' => 'Educational pin purchase successful!',
+                    'ref'     => $requestId,
+                    'mobile'  => $request->mobileno,
+                    'amount'  => $fee,
+                    'pins'    => $finalPinData,
+                    'network' => strtoupper($request->service)
+                ]);
+            } else {
+                // Create failed transaction
+                $payer_name = $user->first_name . ' ' . $user->last_name;
+                Transaction::create([
+                    'transaction_ref' => $requestId,
+                    'user_id'         => $user->id,
+                    'amount'          => $fee,
+                    'description'     => "Failed Educational pin purchase: " . strtoupper($request->service) . " (x{$request->quantity})",
+                    'type'            => 'debit',
+                    'status'          => 'failed',
+                    'service_type'    => 'educational_pin',
+                    'performed_by'    => $payer_name,
+                    'approved_by'     => $user->id,
+                    'metadata'        => json_encode([
+                        'phone'    => $request->mobileno,
+                        'service'  => $request->service,
+                        'quantity' => $request->quantity,
+                        'api_response' => $result,
+                    ])
+                ]);
+
+                return back()->with('error', 'Purchase failed. ' . ($result['msg'] ?? $result['message'] ?? 'Please try again later.'));
             }
         } catch (\Exception $e) {
             Log::error('Educational Pin Purchase Exception', ['error' => $e->getMessage()]);

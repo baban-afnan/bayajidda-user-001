@@ -194,20 +194,40 @@
     </div>
 
     {{-- PIN Confirmation Modal --}}
-    <div class="modal fade" id="pinModal" tabindex="-1" aria-labelledby="pinModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 shadow-lg border-0">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title fw-semibold" id="pinModalLabel">
-                        <i class="bi bi-shield-lock-fill me-2"></i> Enter Your Transaction PIN
+                        <i class="bi bi-shield-lock-fill me-2"></i> Confirm Transaction
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body text-center py-4">
+                    <div class="mb-4 text-start bg-light p-3 rounded-3 border">
+                        <h6 class="fw-bold border-bottom pb-2 mb-2">Transaction Summary</h6>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Service:</span>
+                            <span id="modal-service-name" class="fw-semibold text-primary">Electricity</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Provider:</span>
+                            <span id="modal-service-provider" class="fw-semibold text-uppercase"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Customer:</span>
+                            <span id="modal-customer-name-sum" class="fw-semibold"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Meter No:</span>
+                            <span id="modal-meter-no" class="fw-semibold"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 pt-2 border-top">
+                            <span class="fw-bold">Total Amount:</span>
+                            <span id="modal-amount-sum" class="fw-bold text-danger"></span>
+                        </div>
+                    </div>
+
                     <p class="text-muted mb-3 small">
-                        Confirm payment of <strong>₦<span id="modal-amount"></span></strong> for <strong><span id="modal-customer-name"></span></strong>.<br>
-                        Please enter your <strong>5-digit transaction PIN</strong>.
+                        Please enter your <strong>5-digit transaction PIN</strong> to authorize this payment.
                     </p>
 
                     <div class="d-flex justify-content-center">
@@ -277,7 +297,10 @@
                         
                         customerNameSpan.textContent = data.customer_name;
                         customerAddressSpan.textContent = data.address;
-                        modalCustomerName.textContent = data.customer_name;
+                        
+                        document.getElementById('modal-customer-name-sum').textContent = data.customer_name;
+                        document.getElementById('modal-meter-no').textContent = meter;
+                        document.getElementById('modal-service-provider').textContent = serviceSelect.options[serviceSelect.selectedIndex].text;
                         
                         customerInfo.classList.remove('d-none');
                         proceedBtn.disabled = false;
@@ -297,7 +320,7 @@
 
             // Update modal amount when amount input changes
             amountInput.addEventListener('input', function() {
-                modalAmount.textContent = this.value;
+                document.getElementById('modal-amount-sum').textContent = this.value ? '₦' + parseFloat(this.value).toLocaleString() : '₦0';
             });
 
             // PIN Confirmation Logic

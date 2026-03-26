@@ -50,17 +50,27 @@
                             <form id="buy-pin" method="POST" action="{{ route('buypin') }}">
                                 @csrf
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold">Select Service</label>
                                     <select name="service" id="service_id" class="form-select text-center" required>
                                         <option value="">-- Select Service --</option>
                                         <option value="waec">WAEC Result Checker</option>
-                                        <option value="waec-registration">WAEC Registration</option>
+                                        <option value="neco">NECO Result Checker</option>
                                     </select>
                                 </div>
 
                                 <div class="mb-3">
+                                    <label class="form-label fw-semibold">Quantity</label>
+                                    <select name="quantity" id="quantity" class="form-select text-center" required>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3 d-none">
                                     <label class="form-label fw-semibold">Select Type</label>
-                                    <select name="type" id="type" class="form-select text-center" required>
+                                    <select name="type" id="type" class="form-select text-center">
                                         <option value="">-- Choose Type --</option>
                                         @foreach ($pins as $p)
                                             <option value="{{ $p->variation_code }}" data-amount="{{ $p->variation_amount }}">
@@ -90,8 +100,7 @@
                                 </div>
 
                                 <div class="d-grid mt-4">
-                                <button type="button" class="btn btn-primary btn-lg fw-semibold"
-                                    data-bs-toggle="modal" data-bs-target="#pinModal">
+                                <button type="button" id="proceedPurchaseBtn" class="btn btn-primary btn-lg fw-semibold">
                                         Proceed to Buy
                                      </button>
                                 </div>
@@ -127,15 +136,13 @@
                                             @foreach ($history as $data)
                                                 <tr>
                                                     <td class="text-center">{{ $data->created_at->format('d M Y') }}</td>
-                                                    <td>{{ strtoupper($data->network) }}</td>
+                                                    <td>{{ strtoupper($data->exam_name) }} (x{{ $data->quantity }})</td>
                                                     <td>
                                                         @php
-                                                            // Extract token from description if not in a separate column
-                                                            // Assuming format "Educational pin purchase (WAEC) - PIN: xxxx"
-                                                            preg_match('/PIN: (.*)/', $data->description, $matches);
-                                                            $token = $matches[1] ?? 'N/A';
+                                                            $pins = json_decode($data->pins, true);
+                                                            $displayPins = is_array($pins) ? implode(', ', $pins) : $data->pins;
                                                         @endphp
-                                                        <span class="fw-bold text-dark font-monospace">{{ $token }}</span>
+                                                        <span class="fw-bold text-dark font-monospace text-wrap" style="max-width: 200px; display: inline-block;">{{ $displayPins }}</span>
                                                     </td>
                                                     <td class="text-end">₦{{ number_format($data->amount, 2) }}</td>
                                                     <td class="text-center">
@@ -185,36 +192,47 @@
 <div class="modal fade" id="pinModal" tabindex="-1" aria-labelledby="pinModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 shadow-lg border-0">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-semibold" id="pinModalLabel">
-                    <i class="bi bi-shield-lock-fill me-2"></i> Enter Your Transaction PIN
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body text-center py-4">
-                <p class="text-muted mb-3 small">
-                    For your security, please confirm your <strong>5-digit transaction PIN</strong> before proceeding.
-                </p>
-
-                <div class="d-flex justify-content-center">
-                    <input 
-                        type="password" 
-                        name="pin" 
-                        id="pinInput" 
-                        class="form-control text-center fw-bold fs-3 py-3 border-2 border-primary rounded-pill shadow-sm w-50" 
-                        maxlength="5" 
-                        inputmode="numeric" 
-                        placeholder="•••••"
-                        required
-                        style="letter-spacing: 10px; font-family: 'Courier New', monospace;"
-                    >
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-semibold" id="pinModalLabel">
+                        <i class="bi bi-shield-lock-fill me-2"></i> Confirm Transaction
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <small id="pinError" class="text-danger d-none mt-3 d-block fw-semibold">
-                    Incorrect PIN. Please try again.
-                </small>
-            </div>
+                <div class="modal-body text-center py-4">
+                    <div class="mb-4 text-start bg-light p-3 rounded-3 border">
+                        <h6 class="fw-bold border-bottom pb-2 mb-2">Transaction Summary</h6>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Service:</span>
+                            <span id="modal-service-name" class="fw-semibold text-primary">Educational PIN</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Exam Type:</span>
+                            <span id="modal-exam-type" class="fw-semibold text-uppercase"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Quantity:</span>
+                            <span id="modal-quantity" class="fw-semibold"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Recipient Phone:</span>
+                            <span id="modal-phone" class="fw-semibold"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 pt-2 border-top">
+                            <span class="fw-bold">Total Amount:</span>
+                            <span id="modal-amount" class="fw-bold text-danger"></span>
+                        </div>
+                    </div>
+
+                    <p class="text-muted mb-3 small">
+                        Please enter your <strong>5-digit transaction PIN</strong> to authorize this purchase.
+                    </p>
+
+                    <div class="d-flex justify-content-center">
+                        <input type="password" name="pin" id="pinInput" class="form-control text-center fw-bold fs-3 py-3 border-2 border-primary rounded-pill shadow-sm w-50" maxlength="5" inputmode="numeric" placeholder="•••••" required style="letter-spacing: 10px; font-family: 'Courier New', monospace;">
+                    </div>
+                    <small id="pinError" class="text-danger d-none mt-3 d-block fw-semibold">Incorrect PIN. Please try again.</small>
+                </div>
 
             <div class="modal-footer border-0 justify-content-center pb-4">
                 <button type="button" class="btn btn-light px-4 rounded-pill" data-bs-dismiss="modal">
@@ -232,12 +250,52 @@
 </div>
 
 <script>
-// Update amount when type is selected
-document.getElementById('type').addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-    const amount = selectedOption.getAttribute('data-amount');
-    document.getElementById('amountToPay').value = amount ? amount : '';
+// Update amount when service or quantity is changed
+function updateAmount() {
+    const serviceSelect = document.getElementById('service_id');
+    const typeSelect = document.getElementById('type');
+    const quantity = document.getElementById('quantity').value;
+    const selectedService = serviceSelect.value;
+    
+    // Find variation that matches service
+    let variation = null;
+    if (selectedService === 'waec') {
+        variation = Array.from(typeSelect.options).find(opt => opt.text.includes('WAEC'));
+    } else if (selectedService === 'neco') {
+        variation = Array.from(typeSelect.options).find(opt => opt.text.includes('NECO'));
+    }
+
+    if (variation) {
+        const baseAmount = variation.getAttribute('data-amount');
+        document.getElementById('amountToPay').value = baseAmount ? (baseAmount * quantity) : '';
+    } else {
+        document.getElementById('amountToPay').value = '';
+    }
+}
+
+document.getElementById('proceedPurchaseBtn').addEventListener('click', function() {
+    const service = document.getElementById('service_id').value;
+    const quantity = document.getElementById('quantity').value;
+    const phone = document.getElementById('mobileno').value;
+    const amount = document.getElementById('amountToPay').value;
+
+    if (!service || !phone) {
+        alert("Please select a service and enter a phone number.");
+        return;
+    }
+
+    document.getElementById('modal-exam-type').textContent = service;
+    document.getElementById('modal-quantity').textContent = quantity;
+    document.getElementById('modal-phone').textContent = phone;
+    document.getElementById('modal-amount').textContent = '₦' + parseFloat(amount).toLocaleString();
+
+    const pinModal = new bootstrap.Modal(document.getElementById('pinModal'));
+    pinModal.show();
 });
+
+document.getElementById('service_id').addEventListener('change', updateAmount);
+document.getElementById('quantity').addEventListener('change', updateAmount);
+updateAmount();
 
 document.getElementById('confirmPinBtn').addEventListener('click', function() {
     const confirmBtn = this;

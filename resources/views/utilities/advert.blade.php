@@ -45,7 +45,7 @@
 
             <!-- Action Buttons -->
             <div class="d-grid gap-3 w-100" style="max-width: 450px;">
-                <a href="{{ route('buy-data') }}" class="btn btn-light btn-lg fw-semibold shadow-lg hover-lift" style="border-radius: 12px; padding: 1rem 2rem;">
+                <a href="{{ route('buy-sme-data') }}" class="btn btn-light btn-lg fw-semibold shadow-lg hover-lift" style="border-radius: 12px; padding: 1rem 2rem;">
                     <i class="bi bi-wifi me-2"></i> Buy Data Bundles
                 </a>
                 
@@ -57,7 +57,7 @@
                         </a>
                     </div>
                     <div class="col-6">
-                        <a href="{{ route('cable') }}" class="btn btn-outline-light w-100 hover-lift" style="border-radius: 12px; padding: 0.75rem; border-width: 2px; background-color: rgba(255,255,255,0.1);">
+                        <a href="{{ route('tv') }}" class="btn btn-outline-light w-100 hover-lift" style="border-radius: 12px; padding: 0.75rem; border-width: 2px; background-color: rgba(255,255,255,0.1);">
                             <i class="bi bi-tv-fill me-1 text-info"></i>
                             <div class="small text-white">Cable TV</div>
                         </a>

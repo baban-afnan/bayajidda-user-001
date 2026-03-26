@@ -23,20 +23,7 @@
                                 Select network, plan type, and your desired data bundle.
                             </p>
 
-                            {{-- Flash Messages --}}
-                            @if (session('success'))
-                                <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
-                                    {!! session('success') !!}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            @endif
-
-                            @if (session('error'))
-                                <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
-                                    {{ session('error') }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            @endif
+                            {{-- Flash Messages will be shown via SweetAlert below --}}
 
                             {{-- Buy SME Data Form --}}
                             <form id="buySmeDataForm" method="POST" action="{{ route('buy-sme-data.submit') }}">
@@ -93,8 +80,7 @@
 
                                 {{-- Submit --}}
                                 <div class="d-grid mt-4">
-                                    <button type="button" class="btn btn-primary btn-lg fw-semibold"
-                                            data-bs-toggle="modal" data-bs-target="#pinModal">
+                                    <button type="button" id="purchaseBtn" class="btn btn-primary btn-lg fw-semibold">
                                         Purchase Data
                                     </button>
                                 </div>
@@ -113,7 +99,7 @@
     <div class="modal fade" id="pinModal" tabindex="-1" aria-labelledby="pinModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 shadow-lg border-0">
-                <div class="modal-header bg-success text-white">
+                <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title fw-semibold" id="pinModalLabel">
                         <i class="bi bi-shield-lock-fill me-2"></i> Confirm Transaction
                     </h5>
@@ -121,6 +107,26 @@
                 </div>
 
                 <div class="modal-body text-center py-4">
+                    <div class="mb-4 text-start bg-light p-3 rounded-3 border">
+                        <h6 class="fw-bold border-bottom pb-2 mb-2">Transaction Summary</h6>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Service:</span>
+                            <span id="modal-service-name" class="fw-semibold text-primary">SME Data</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Plan:</span>
+                            <span id="modal-plan-name" class="fw-semibold"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Recipient:</span>
+                            <span id="modal-recipient" class="fw-semibold"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 pt-2 border-top">
+                            <span class="fw-bold">Total Amount:</span>
+                            <span id="modal-amount" class="fw-bold text-danger"></span>
+                        </div>
+                    </div>
+
                     <p class="text-muted mb-3 small">
                         Please enter your <strong>5-digit transaction PIN</strong> to authorize this purchase.
                     </p>
@@ -130,7 +136,7 @@
                             type="password" 
                             name="pin" 
                             id="pinInput" 
-                            class="form-control text-center fw-bold fs-3 py-3 border-2 border-success rounded-pill shadow-sm w-50" 
+                            class="form-control text-center fw-bold fs-3 py-3 border-2 border-primary rounded-pill shadow-sm w-50" 
                             maxlength="5" 
                             inputmode="numeric" 
                             placeholder="•••••"
@@ -148,7 +154,7 @@
                     <button type="button" class="btn btn-light px-4 rounded-pill" data-bs-dismiss="modal">
                         Cancel
                     </button>
-                    <button type="button" id="confirmPinBtn" class="btn btn-success px-4 rounded-pill fw-semibold">
+                    <button type="button" id="confirmPinBtn" class="btn btn-primary px-4 rounded-pill fw-semibold">
                         <span class="spinner-border spinner-border-sm me-2 d-none" id="pinLoader" role="status" aria-hidden="true"></span>
                         <span id="confirmPinText">Confirm Purchase</span>
                     </button>
@@ -161,6 +167,19 @@
 @push('scripts')
     <script>
     $(document).ready(function () {
+        @if(session('success'))
+            if(typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'success', title: 'Success!', html: "{!! session('success') !!}" });
+            }
+        @endif
+        
+        @if(session('error'))
+            if(typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'error', title: 'Oops...', text: "{!! session('error') !!}" });
+            } else {
+                alert("{!! session('error') !!}");
+            }
+        @endif
         $("#service_id").change(function () {
             let service_id = $(this).val();
             if(!service_id) return;
@@ -241,6 +260,26 @@
                     console.error("Error fetching price", data);
                 },
             });
+        });
+
+        // Purchase Click (Show Modal with Summary)
+        $("#purchaseBtn").on('click', function() {
+            const network = $("#service_id option:selected").text();
+            const plan = $("#plan option:selected").text();
+            const recipient = $("#mobileno").val();
+            const amount = $("#amountToPay").val();
+
+            if (!$("#service_id").val() || !$("#plan").val() || !recipient) {
+                alert("Please fill all fields first.");
+                return;
+            }
+
+            $("#modal-service-name").text(network + " Data");
+            $("#modal-plan-name").text(plan);
+            $("#modal-recipient").text(recipient);
+            $("#modal-amount").text(amount);
+
+            new bootstrap.Modal(document.getElementById('pinModal')).show();
         });
 
         // PIN Confirmation Logic

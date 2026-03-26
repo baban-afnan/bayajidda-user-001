@@ -124,17 +124,30 @@
             <div class="modal-content rounded-4 shadow-lg border-0">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title text-white fw-semibold" id="pinModalLabel">
-                        <i class="bi bi-shield-lock-fill me-2"></i> Confirm Transaction PIN
+                        <i class="bi bi-shield-lock-fill me-2"></i> Confirm Transaction
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body text-center py-4">
-                    <div class="mb-3">
-                        <h5 class="fw-bold">Transaction Summary</h5>
-                        <p class="mb-1">Plan: <span id="summary-name" class="fw-semibold"></span></p>
-                        <p class="mb-1" id="summary-type-label">Number: <span id="summary-number" class="fw-semibold"></span></p>
-                        <p class="mb-3">Amount: <span id="summary-price" class="text-danger fw-bold"></span></p>
+                    <div class="mb-4 text-start bg-light p-3 rounded-3 border">
+                        <h6 class="fw-bold border-bottom pb-2 mb-2">Transaction Summary</h6>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Service:</span>
+                            <span id="modal-service-name" class="fw-semibold text-primary">Smile Data</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Plan:</span>
+                            <span id="summary-name" class="fw-semibold text-wrap" style="max-width: 150px;"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Account Number:</span>
+                            <span id="summary-number" class="fw-semibold"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 pt-2 border-top">
+                            <span class="fw-bold">Total Amount:</span>
+                            <span id="summary-price" class="fw-bold text-danger"></span>
+                        </div>
                     </div>
 
                     <p class="text-muted mb-3 small">
@@ -214,7 +227,8 @@
                     }
 
                     this.disabled = true;
-                    this.innerHTML = '<i class="bi bi-arrow-repeat spinner-border spinner-border-sm"></i> Verifying...';
+                    document.getElementById('pinLoader').classList.remove('d-none');
+                    document.getElementById('confirmPinText').textContent = 'Verifying...';
 
                     fetch("{{ route('verify.pin') }}", {
                         method: "POST",
@@ -232,13 +246,15 @@
                             pinError.classList.remove('d-none');
                             pinError.textContent = "Incorrect PIN. Please try again.";
                             this.disabled = false;
-                            this.innerHTML = 'Confirm & Proceed';
+                            document.getElementById('pinLoader').classList.add('d-none');
+                            document.getElementById('confirmPinText').textContent = 'Confirm & Proceed';
                         }
                     })
                     .catch(() => {
                         alert("Network error, please try again.");
                         this.disabled = false;
-                        this.innerHTML = 'Confirm & Proceed';
+                        document.getElementById('pinLoader').classList.add('d-none');
+                        document.getElementById('confirmPinText').textContent = 'Confirm & Proceed';
                     });
                 });
             });

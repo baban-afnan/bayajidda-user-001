@@ -65,25 +65,10 @@
                                     <div class="small">Due Date: <span id="due-date"></span></div>
                                 </div>
 
-                                {{-- Subscription Type --}}
-                                <div id="sub-type-section" class="mb-3 d-none">
-                                    <label class="form-label fw-semibold">Subscription Type</label>
-                                    <div class="d-flex justify-content-center gap-3">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="subscription_type" id="sub_renew" value="renew" checked>
-                                            <label class="form-check-label" for="sub_renew">Renew Current</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="subscription_type" id="sub_change" value="change">
-                                            <label class="form-check-label" for="sub_change">Change Package</label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- Package Selection (Hidden for Renew) --}}
-                                <div class="mb-3 d-none" id="package-section">
+                                {{-- Package Selection --}}
+                                <div class="mb-3" id="package-section">
                                     <label class="form-label fw-semibold">Select Package</label>
-                                    <select name="variation_code" id="variation_code" class="form-select text-center">
+                                    <select name="variation_code" id="variation_code" class="form-select text-center" required>
                                         <option value="">-- Select Package --</option>
                                         <!-- Populated via JS -->
                                     </select>
@@ -146,8 +131,8 @@
                                             @foreach ($history as $data)
                                                 <tr>
                                                     <td class="text-center">{{ $data->created_at->format('d M Y') }}</td>
-                                                    <td>{{ strtoupper($data->network) }}</td>
-                                                    <td>{{ $data->phone_number }}</td>
+                                                    <td>{{ strtoupper($data->cablename) }}</td>
+                                                    <td>{{ $data->smart_card_number }}</td>
                                                     <td class="text-end">₦{{ number_format($data->amount, 2) }}</td>
                                                     <td class="text-center">
                                                         <span class="badge bg-success-subtle text-success fw-semibold">Successful</span>
@@ -181,15 +166,38 @@
             <div class="modal-content rounded-4 shadow-lg border-0">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title fw-semibold" id="pinModalLabel">
-                        <i class="bi bi-shield-lock-fill me-2"></i> Enter Your Transaction PIN
+                        <i class="bi bi-shield-lock-fill me-2"></i> Confirm Transaction
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body text-center py-4">
+                    <div class="mb-4 text-start bg-light p-3 rounded-3 border">
+                        <h6 class="fw-bold border-bottom pb-2 mb-2">Transaction Summary</h6>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Service:</span>
+                            <span id="modal-service-name" class="fw-semibold text-primary"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Customer:</span>
+                            <span id="modal-customer-name-sum" class="fw-semibold"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">IUC Number:</span>
+                            <span id="modal-iuc" class="fw-semibold"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Package:</span>
+                            <span id="modal-package-name" class="fw-semibold text-wrap" style="max-width: 150px;"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 pt-2 border-top">
+                            <span class="fw-bold">Total Amount:</span>
+                            <span id="modal-amount-sum" class="fw-bold text-danger"></span>
+                        </div>
+                    </div>
+
                     <p class="text-muted mb-3 small">
-                        Confirm subscription of <strong>₦<span id="modal-amount"></span></strong> for <strong><span id="modal-customer-name"></span></strong>.<br>
-                        Please enter your <strong>5-digit transaction PIN</strong>.
+                        Please enter your <strong>5-digit transaction PIN</strong> to authorize this purchase.
                     </p>
 
                     <div class="d-flex justify-content-center">
@@ -236,7 +244,7 @@
             serviceSelect.addEventListener('change', function() {
                 const service = this.value;
                 if(service) {
-                    fetch("{{ route('cable.variations') }}?service_id=" + service)
+                    fetch("{{ route('tv.variations') }}?service_id=" + service)
                         .then(res => res.json())
                         .then(data => {
                             if(data.success) {
@@ -275,7 +283,7 @@
                 subTypeSection.classList.add('d-none');
                 proceedBtn.disabled = true;
 
-                fetch("{{ route('verify.cable') }}", {
+                fetch("{{ route('verify.iuc') }}", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -299,47 +307,18 @@
                         
                         renewalAmount = data.renewal_amount || 0;
                         
-                        // Default to Renew
-                        document.getElementById('sub_renew').checked = true;
-                        handleSubTypeChange();
+                        // Show package section and reset amount
+                        packageSection.classList.remove('d-none');
+                        amountInput.value = '';
+                        // Reset modal summary
+                        document.getElementById('modal-customer-name').textContent = data.customer_name;
+                        document.getElementById('modal-iuc').textContent = meter;
+                        document.getElementById('modal-service-name').textContent = cablenameSelect.options[cablenameSelect.selectedIndex].text;
+                        
+                        variationSelect.required = true;
                         
                         customerInfo.classList.remove('d-none');
-                        subTypeSection.classList.remove('d-none');
                         proceedBtn.disabled = false;
-                    } else {
-                        verifyStatus.className = 'd-block mt-1 fw-bold text-danger';
-                        verifyStatus.textContent = data.message || 'Verification failed.';
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    verifyBtn.disabled = false;
-                    verifyBtn.textContent = 'Verify';
-                    verifyStatus.className = 'd-block mt-1 fw-bold text-danger';
-                    verifyStatus.textContent = 'Network error. Please try again.';
-                });
-            });
-
-            // Handle Subscription Type Change
-            const radioButtons = document.querySelectorAll('input[name="subscription_type"]');
-            radioButtons.forEach(radio => {
-                radio.addEventListener('change', handleSubTypeChange);
-            });
-
-            function handleSubTypeChange() {
-                const type = document.querySelector('input[name="subscription_type"]:checked').value;
-                if (type === 'renew') {
-                    packageSection.classList.add('d-none');
-                    amountInput.value = renewalAmount;
-                    modalAmount.textContent = renewalAmount;
-                    variationSelect.required = false;
-                } else {
-                    packageSection.classList.remove('d-none');
-                    amountInput.value = ''; // Clear amount, wait for selection
-                    modalAmount.textContent = '0';
-                    variationSelect.required = true;
-                }
-            }
 
             // Handle Package Selection
             variationSelect.addEventListener('change', function() {
@@ -347,7 +326,8 @@
                 const amount = selectedOption.dataset.amount;
                 if(amount) {
                     amountInput.value = amount;
-                    modalAmount.textContent = amount;
+                    document.getElementById('modal-amount-sum').textContent = '₦' + parseFloat(amount).toLocaleString();
+                    document.getElementById('modal-package-name').textContent = selectedOption.text;
                 }
             });
 

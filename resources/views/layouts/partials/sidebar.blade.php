@@ -47,9 +47,10 @@
                     </a>
                     <ul>
                         <li><a href="{{ route('airtime') }}" class="{{ request()->routeIs('airtime') ? 'active' : '' }}">Buy Airtime</a></li>
-                        <li><a href="{{ route('buy-data') }}" class="{{ request()->routeIs('buy-data') ? 'active' : '' }}">Buy Data</a></li>
                         <li><a href="{{ route('buy-sme-data') }}" class="{{ request()->routeIs('buy-sme-data') ? 'active' : '' }}">Buy SME Data</a></li>
                         <li><a href="{{ route('electricity') }}" class="{{ request()->routeIs('electricity') ? 'active' : '' }}">Pay Electric</a></li>
+                        <li><a href="{{ route('education') }}" class="{{ request()->routeIs('education') ? 'active' : '' }}">Buy Educational Pin</a></li>
+                        <li><a href="{{ route('tv') }}" class="{{ request()->routeIs('tv') ? 'active' : '' }}">Pay TV Subcription</a></li>
                     </ul>
                 </li>
 

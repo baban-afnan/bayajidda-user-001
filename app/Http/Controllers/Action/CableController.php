@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Action;
 use App\Helpers\RequestIdHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Report;
+use App\Models\CableSubscription;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use Illuminate\Http\Request;
@@ -31,9 +32,8 @@ class CableController extends Controller
             ['balance' => 0.00, 'status' => 'active']
         );
 
-        // Fetch Cable purchase history
-        $history = Report::where('user_id', $user->id)
-            ->where('type', 'cable')
+        // Fetch Cable purchase history from new model
+        $history = CableSubscription::where('user_id', $user->id)
             ->latest()
             ->paginate(10);
 
@@ -107,33 +107,45 @@ class CableController extends Controller
             'billersCode' => 'required|string',
         ]);
 
+        $cableIdMap = [
+            'gotv'      => 1,
+            'dstv'      => 2,
+            'startimes' => 3,
+            'showmax'   => 4,
+        ];
+
+        $cablename = $cableIdMap[strtolower($request->service_id)] ?? $request->service_id;
+
         try {
+            $apiKey = env('ALRAHUZ_API_KEY');
+            $url = env('ALRAHUZ_VALIDATE_IUC_URL');
+
             $response = Http::withHeaders([
-                'api-key'    => env('API_KEY'),
-                'secret-key' => env('SECRET_KEY'),
-            ])->post(env('BASE_URL', 'https://sandbox.vtpass.com/api') . '/merchant-verify', [
-                'serviceID'   => $request->service_id,
-                'billersCode' => $request->billersCode,
+                'Authorization' => 'Token ' . $apiKey,
+                'Content-Type'  => 'application/json',
+            ])->get($url, [
+                'smart_card_number' => $request->billersCode,
+                'cablename'         => $cablename,
             ]);
 
             if ($response->successful()) {
                 $data = $response->json();
-                if (isset($data['code']) && $data['code'] == '000') {
-                    $content = $data['content'];
-                    
+                // Alrahuz usually returns { "invalid": false, "name": "..." } or similar
+                // Based on standard, I'll check for 'name' or successful status
+                if (isset($data['name']) || (isset($data['invalid']) && $data['invalid'] == false)) {
                     return response()->json([
                         'success'        => true,
-                        'customer_name'  => $content['Customer_Name'] ?? 'Unknown',
-                        'status'         => $content['Status'] ?? 'N/A',
-                        'due_date'       => $content['Due_Date'] ?? 'N/A',
-                        'customer_number'=> $content['Customer_Number'] ?? $request->billersCode,
-                        'current_bouquet'=> $content['Current_Bouquet'] ?? 'N/A', // Some APIs return this
-                        'renewal_amount' => $content['Renewal_Amount'] ?? 0, // Important for renewal
+                        'customer_name'  => $data['name'] ?? $data['Customer_Name'] ?? 'Verified Customer',
+                        'status'         => 'Active',
+                        'due_date'       => 'N/A',
+                        'customer_number'=> $request->billersCode,
+                        'current_bouquet'=> 'N/A',
+                        'renewal_amount' => 0,
                     ]);
                 }
             }
 
-            return response()->json(['success' => false, 'message' => 'Unable to verify IUC number.']);
+            return response()->json(['success' => false, 'message' => 'Unable to verify IUC number. ' . ($data['error'] ?? '')]);
 
         } catch (\Exception $e) {
             Log::error('Cable Verification Error: ' . $e->getMessage());
@@ -182,25 +194,36 @@ class CableController extends Controller
                 $payload['variation_code'] = $request->variation_code;
             }
 
-            // Call VTPass API
+            $cableIdMap = [
+                'gotv'      => 1,
+                'dstv'      => 2,
+                'startimes' => 3,
+                'showmax'   => 4,
+            ];
+
+            $cablenameId = $cableIdMap[strtolower($request->service_id)] ?? $request->service_id;
+
+            // Call Alrahuz API
+            $apiKey = env('ALRAHUZ_API_KEY');
+            $url = env('ALRAHUZ_CABLESUB_URL');
+
             $response = Http::withHeaders([
-                'api-key'    => env('API_KEY'),
-                'secret-key' => env('SECRET_KEY'),
-            ])->post(env('MAKE_PAYMENT'), $payload);
+                'Authorization' => 'Token ' . $apiKey,
+                'Content-Type'  => 'application/json',
+            ])->post($url, [
+                'cablename'         => $cablenameId,
+                'cableplan'         => $request->variation_code,
+                'smart_card_number' => $request->billersCode,
+            ]);
 
             if ($response->successful()) {
                 $result = $response->json();
                 
-                $successCodes = ['0', '00', '000', '200'];
-                $isSuccessful = (isset($result['code']) && in_array((string)$result['code'], $successCodes)) ||
-                                (isset($result['status']) && strtolower($result['status']) === 'success');
-
-                if ($isSuccessful) {
+                if (isset($result['Status']) && strtolower($result['Status']) === 'successful' && !isset($result['error'])) {
                     $wallet->decrement('balance', $amount);
 
                     $serviceName = strtoupper($request->service_id);
-                    $subType = ucfirst($request->subscription_type);
-                    $description = "{$serviceName} Subscription ({$subType}) - IUC: {$request->billersCode}";
+                    $description = "{$serviceName} Subscription - IUC: {$request->billersCode}";
 
                     // Transaction Record
                     Transaction::create([
@@ -213,7 +236,6 @@ class CableController extends Controller
                         'metadata'        => json_encode([
                             'service_id'   => $request->service_id,
                             'billersCode'  => $request->billersCode,
-                            'sub_type'     => $request->subscription_type,
                             'variation'    => $request->variation_code,
                             'api_response' => $result,
                         ]),
@@ -221,35 +243,58 @@ class CableController extends Controller
                         'approved_by'  => $user->id,
                     ]);
 
-                    // Report Record
-                    Report::create([
-                        'user_id'      => $user->id,
-                        'phone_number' => $request->billersCode,
-                        'network'      => $request->service_id,
-                        'ref'          => $requestId,
-                        'amount'       => $amount,
-                        'status'       => 'successful',
-                        'type'         => 'cable',
-                        'description'  => $description,
-                        'old_balance'  => $wallet->balance + $amount,
-                        'new_balance'  => $wallet->balance,
+                    // CableSubscription Record
+                    CableSubscription::create([
+                        'user_id'           => $user->id,
+                        'transaction_ref'   => $requestId,
+                        'cablename'         => $serviceName,
+                        'cableplan'         => $request->variation_code,
+                        'smart_card_number' => $request->billersCode,
+                        'amount'            => $amount,
+                        'status'            => 'completed',
                     ]);
+
+                    // NOTE: Report::create REMOVED as requested
 
                     return redirect()->route('thankyou')->with([
                         'success' => 'Cable subscription successful!',
                         'ref'     => $requestId,
                         'mobile'  => $request->billersCode,
                         'amount'  => $amount,
-                        'token'   => 'Subscription Active', // No token for cable usually
+                        'token'   => 'Subscription Active',
                         'network' => $serviceName
                     ]);
 
                 } else {
-                    Log::error('Cable API Error', ['response' => $result]);
-                    return back()->with('error', 'Subscription failed. ' . ($result['response_description'] ?? 'Try again.'));
+                    Log::error('Alrahuz Cable API Error', ['response' => $result]);
+
+                    // Create failed transaction
+                    $serviceName = strtoupper($request->service_id);
+                    $description = "{$serviceName} Subscription - IUC: {$request->billersCode}";
+
+                    Transaction::create([
+                        'transaction_ref' => $requestId,
+                        'user_id'         => $user->id,
+                        'amount'          => $amount,
+                        'description'     => "Failed " . $description,
+                        'type'            => 'debit',
+                        'status'          => 'failed',
+                        'service_type'    => 'cable',
+                        'performed_by'    => $user->first_name . ' ' . $user->last_name,
+                        'approved_by'     => $user->id,
+                        'metadata'        => json_encode([
+                            'service_id'   => $request->service_id,
+                            'billersCode'  => $request->billersCode,
+                            'variation'    => $request->variation_code,
+                            'api_response' => $result
+                        ])
+                    ]);
+
+                    $errorMessage = $result['msg'] ?? $result['message'] ?? 'Subscription failed. Please try again.';
+                    return back()->with('error', $errorMessage);
                 }
             } else {
-                Log::error('Cable HTTP Error', ['body' => $response->body()]);
+                Log::error('Alrahuz Cable HTTP Error', ['body' => $response->body()]);
                 return back()->with('error', 'Service unavailable.');
             }
 

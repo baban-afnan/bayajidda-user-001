@@ -184,16 +184,6 @@
                             </a>
                         </div>
 
-                        <!-- Data -->
-                        <div class="col">
-                            <a href="{{ route('buy-data') }}" class="text-decoration-none service-item">
-                                <div class="service-icon-wrap mb-2 mx-auto">
-                                    <i class="ti ti-wifi fs-24 text-warning"></i>
-                                </div>
-                                <span class="fs-13 fw-medium text-dark d-block">Data</span>
-                            </a>
-                        </div>
-
                         <!-- SME Data -->
                         <div class="col">
                             <a href="{{ route('buy-sme-data') }}" class="text-decoration-none service-item">
